@@ -18,6 +18,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as MarketsIndexRouteImport } from './routes/markets/index'
 import { Route as MarketsSlugRouteImport } from './routes/markets/$slug'
+import { Route as MarketsSlugReviewRouteImport } from './routes/markets/$slug.review'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -64,6 +65,11 @@ const MarketsSlugRoute = MarketsSlugRouteImport.update({
   path: '/markets/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MarketsSlugReviewRoute = MarketsSlugReviewRouteImport.update({
+  id: '/review',
+  path: '/review',
+  getParentRoute: () => MarketsSlugRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -73,8 +79,9 @@ export interface FileRoutesByFullPath {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
-  '/markets/$slug': typeof MarketsSlugRoute
+  '/markets/$slug': typeof MarketsSlugRouteWithChildren
   '/markets/': typeof MarketsIndexRoute
+  '/markets/$slug/review': typeof MarketsSlugReviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -84,8 +91,9 @@ export interface FileRoutesByTo {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
-  '/markets/$slug': typeof MarketsSlugRoute
+  '/markets/$slug': typeof MarketsSlugRouteWithChildren
   '/markets': typeof MarketsIndexRoute
+  '/markets/$slug/review': typeof MarketsSlugReviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -96,8 +104,9 @@ export interface FileRoutesById {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
-  '/markets/$slug': typeof MarketsSlugRoute
+  '/markets/$slug': typeof MarketsSlugRouteWithChildren
   '/markets/': typeof MarketsIndexRoute
+  '/markets/$slug/review': typeof MarketsSlugReviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -111,6 +120,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/markets/$slug'
     | '/markets/'
+    | '/markets/$slug/review'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/markets/$slug'
     | '/markets'
+    | '/markets/$slug/review'
   id:
     | '__root__'
     | '/'
@@ -133,6 +144,7 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/markets/$slug'
     | '/markets/'
+    | '/markets/$slug/review'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -143,7 +155,7 @@ export interface RootRouteChildren {
   SigninRoute: typeof SigninRoute
   SignupRoute: typeof SignupRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
-  MarketsSlugRoute: typeof MarketsSlugRoute
+  MarketsSlugRoute: typeof MarketsSlugRouteWithChildren
   MarketsIndexRoute: typeof MarketsIndexRoute
 }
 
@@ -212,8 +224,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/markets/$slug/review': {
+      id: '/markets/$slug/review'
+      path: '/review'
+      fullPath: '/markets/$slug/review'
+      preLoaderRoute: typeof MarketsSlugReviewRouteImport
+      parentRoute: typeof MarketsSlugRoute
+    }
   }
 }
+
+interface MarketsSlugRouteChildren {
+  MarketsSlugReviewRoute: typeof MarketsSlugReviewRoute
+}
+
+const MarketsSlugRouteChildren: MarketsSlugRouteChildren = {
+  MarketsSlugReviewRoute: MarketsSlugReviewRoute,
+}
+
+const MarketsSlugRouteWithChildren = MarketsSlugRoute._addFileChildren(
+  MarketsSlugRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -223,7 +254,7 @@ const rootRouteChildren: RootRouteChildren = {
   SigninRoute: SigninRoute,
   SignupRoute: SignupRoute,
   VerifyEmailRoute: VerifyEmailRoute,
-  MarketsSlugRoute: MarketsSlugRoute,
+  MarketsSlugRoute: MarketsSlugRouteWithChildren,
   MarketsIndexRoute: MarketsIndexRoute,
 }
 export const routeTree = rootRouteImport
