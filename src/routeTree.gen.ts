@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ReviewSubmittedRouteImport } from './routes/review-submitted'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
@@ -38,6 +39,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReviewSubmittedRoute = ReviewSubmittedRouteImport.update({
+  id: '/review-submitted',
+  path: '/review-submitted',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SigninRoute = SigninRouteImport.update({
@@ -76,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/onboarding': typeof OnboardingRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/review-submitted': typeof ReviewSubmittedRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/account': typeof AccountRoute
   '/onboarding': typeof OnboardingRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/review-submitted': typeof ReviewSubmittedRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/onboarding': typeof OnboardingRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/review-submitted': typeof ReviewSubmittedRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/onboarding'
     | '/reset-password'
+    | '/review-submitted'
     | '/signin'
     | '/signup'
     | '/verify-email'
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/onboarding'
     | '/reset-password'
+    | '/review-submitted'
     | '/signin'
     | '/signup'
     | '/verify-email'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/onboarding'
     | '/reset-password'
+    | '/review-submitted'
     | '/signin'
     | '/signup'
     | '/verify-email'
@@ -152,6 +164,7 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   OnboardingRoute: typeof OnboardingRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ReviewSubmittedRoute: typeof ReviewSubmittedRoute
   SigninRoute: typeof SigninRoute
   SignupRoute: typeof SignupRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
@@ -187,6 +200,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/review-submitted': {
+      id: '/review-submitted'
+      path: '/review-submitted'
+      fullPath: '/review-submitted'
+      preLoaderRoute: typeof ReviewSubmittedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signin': {
@@ -251,6 +271,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRoute,
   OnboardingRoute: OnboardingRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ReviewSubmittedRoute: ReviewSubmittedRoute,
   SigninRoute: SigninRoute,
   SignupRoute: SignupRoute,
   VerifyEmailRoute: VerifyEmailRoute,
