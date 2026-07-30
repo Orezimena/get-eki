@@ -93,7 +93,19 @@ function MarketProfile() {
             <dt className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <User size={14} /> Organiser
             </dt>
-            <dd className="mt-0.5 font-semibold">{market.organiser ?? "—"}</dd>
+            <dd className="mt-0.5 font-semibold">
+              {market.organiser ? (
+                <Link
+                  to="/organisers/$slug"
+                  params={{ slug: organiserSlug(market.organiser) }}
+                  className="text-primary underline-offset-4 hover:underline"
+                >
+                  {market.organiser}
+                </Link>
+              ) : (
+                "—"
+              )}
+            </dd>
           </div>
           <div>
             <dt className="flex items-center gap-1.5 text-xs text-muted-foreground">
