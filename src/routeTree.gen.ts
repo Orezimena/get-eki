@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SigninRoute = SigninRouteImport.update({
+  id: '/signin',
+  path: '/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -31,30 +37,34 @@ const VerifyEmailRoute = VerifyEmailRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/signup' | '/verify-email'
+  fullPaths: '/' | '/signin' | '/signup' | '/verify-email'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/signup' | '/verify-email'
-  id: '__root__' | '/' | '/signup' | '/verify-email'
+  to: '/' | '/signin' | '/signup' | '/verify-email'
+  id: '__root__' | '/' | '/signin' | '/signup' | '/verify-email'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SigninRoute: typeof SigninRoute
   SignupRoute: typeof SignupRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
 }
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signin': {
+      id: '/signin'
+      path: '/signin'
+      fullPath: '/signin'
+      preLoaderRoute: typeof SigninRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SigninRoute: SigninRoute,
   SignupRoute: SignupRoute,
   VerifyEmailRoute: VerifyEmailRoute,
 }
