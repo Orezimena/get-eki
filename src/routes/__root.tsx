@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -12,7 +13,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AuthProvider } from "@/lib/auth";
-import { SiteHeader, SiteFooter } from "@/components/SiteChrome";
+import { SiteHeader, SiteFooter, AdminHeader } from "@/components/SiteChrome";
 import { Toaster } from "@/components/ui/sonner";
 
 
@@ -124,17 +125,20 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const isAdminArea = useRouterState({
+    select: (s) => s.location.pathname.startsWith("/admin"),
+  });
 
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <div className="flex min-h-screen flex-col">
-          <SiteHeader />
+          {isAdminArea ? <AdminHeader /> : <SiteHeader />}
           <main className="flex-1">
             {/* Required: nested routes render here. */}
             <Outlet />
           </main>
-          <SiteFooter />
+          {!isAdminArea && <SiteFooter />}
         </div>
         <Toaster position="top-center" richColors />
       </AuthProvider>

@@ -13,7 +13,7 @@ import {
 import ekiMark from "@/assets/eki-mark.png";
 import { cn } from "@/lib/utils";
 
-export function Logo({ className, to = "/" }: { className?: string; to?: string }) {
+export function Logo({ className, to = "/" }: { className?: string; to?: "/" | "/admin" }) {
   return (
     <Link to={to} className={cn("flex items-center gap-2", className)}>
       <img src={ekiMark} alt="Eki logo" width={32} height={32} className="h-8 w-8 object-contain" />
