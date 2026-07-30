@@ -10,33 +10,179 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AccountRouteImport } from './routes/account'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ReviewSubmittedRouteImport } from './routes/review-submitted'
+import { Route as SigninRouteImport } from './routes/signin'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as VerifyEmailRouteImport } from './routes/verify-email'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as MarketsIndexRouteImport } from './routes/markets/index'
+import { Route as MarketsSlugRouteImport } from './routes/markets/$slug'
+import { Route as MarketsSlugReviewRouteImport } from './routes/markets/$slug.review'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReviewSubmittedRoute = ReviewSubmittedRouteImport.update({
+  id: '/review-submitted',
+  path: '/review-submitted',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SigninRoute = SigninRouteImport.update({
+  id: '/signin',
+  path: '/signin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyEmailRoute = VerifyEmailRouteImport.update({
+  id: '/verify-email',
+  path: '/verify-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketsIndexRoute = MarketsIndexRouteImport.update({
+  id: '/markets/',
+  path: '/markets/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketsSlugRoute = MarketsSlugRouteImport.update({
+  id: '/markets/$slug',
+  path: '/markets/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MarketsSlugReviewRoute = MarketsSlugReviewRouteImport.update({
+  id: '/review',
+  path: '/review',
+  getParentRoute: () => MarketsSlugRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/onboarding': typeof OnboardingRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/review-submitted': typeof ReviewSubmittedRoute
+  '/signin': typeof SigninRoute
+  '/signup': typeof SignupRoute
+  '/verify-email': typeof VerifyEmailRoute
+  '/markets/$slug': typeof MarketsSlugRouteWithChildren
+  '/admin/': typeof AdminIndexRoute
+  '/markets/': typeof MarketsIndexRoute
+  '/markets/$slug/review': typeof MarketsSlugReviewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/onboarding': typeof OnboardingRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/review-submitted': typeof ReviewSubmittedRoute
+  '/signin': typeof SigninRoute
+  '/signup': typeof SignupRoute
+  '/verify-email': typeof VerifyEmailRoute
+  '/markets/$slug': typeof MarketsSlugRouteWithChildren
+  '/admin': typeof AdminIndexRoute
+  '/markets': typeof MarketsIndexRoute
+  '/markets/$slug/review': typeof MarketsSlugReviewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
+  '/onboarding': typeof OnboardingRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/review-submitted': typeof ReviewSubmittedRoute
+  '/signin': typeof SigninRoute
+  '/signup': typeof SignupRoute
+  '/verify-email': typeof VerifyEmailRoute
+  '/markets/$slug': typeof MarketsSlugRouteWithChildren
+  '/admin/': typeof AdminIndexRoute
+  '/markets/': typeof MarketsIndexRoute
+  '/markets/$slug/review': typeof MarketsSlugReviewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/account'
+    | '/onboarding'
+    | '/reset-password'
+    | '/review-submitted'
+    | '/signin'
+    | '/signup'
+    | '/verify-email'
+    | '/markets/$slug'
+    | '/admin/'
+    | '/markets/'
+    | '/markets/$slug/review'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/account'
+    | '/onboarding'
+    | '/reset-password'
+    | '/review-submitted'
+    | '/signin'
+    | '/signup'
+    | '/verify-email'
+    | '/markets/$slug'
+    | '/admin'
+    | '/markets'
+    | '/markets/$slug/review'
+  id:
+    | '__root__'
+    | '/'
+    | '/account'
+    | '/onboarding'
+    | '/reset-password'
+    | '/review-submitted'
+    | '/signin'
+    | '/signup'
+    | '/verify-email'
+    | '/markets/$slug'
+    | '/admin/'
+    | '/markets/'
+    | '/markets/$slug/review'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountRoute: typeof AccountRoute
+  OnboardingRoute: typeof OnboardingRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
+  ReviewSubmittedRoute: typeof ReviewSubmittedRoute
+  SigninRoute: typeof SigninRoute
+  SignupRoute: typeof SignupRoute
+  VerifyEmailRoute: typeof VerifyEmailRoute
+  MarketsSlugRoute: typeof MarketsSlugRouteWithChildren
+  AdminIndexRoute: typeof AdminIndexRoute
+  MarketsIndexRoute: typeof MarketsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,22 +194,111 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/review-submitted': {
+      id: '/review-submitted'
+      path: '/review-submitted'
+      fullPath: '/review-submitted'
+      preLoaderRoute: typeof ReviewSubmittedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signin': {
+      id: '/signin'
+      path: '/signin'
+      fullPath: '/signin'
+      preLoaderRoute: typeof SigninRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify-email': {
+      id: '/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof VerifyEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/markets/': {
+      id: '/markets/'
+      path: '/markets'
+      fullPath: '/markets/'
+      preLoaderRoute: typeof MarketsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/markets/$slug': {
+      id: '/markets/$slug'
+      path: '/markets/$slug'
+      fullPath: '/markets/$slug'
+      preLoaderRoute: typeof MarketsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/markets/$slug/review': {
+      id: '/markets/$slug/review'
+      path: '/review'
+      fullPath: '/markets/$slug/review'
+      preLoaderRoute: typeof MarketsSlugReviewRouteImport
+      parentRoute: typeof MarketsSlugRoute
+    }
   }
 }
 
+interface MarketsSlugRouteChildren {
+  MarketsSlugReviewRoute: typeof MarketsSlugReviewRoute
+}
+
+const MarketsSlugRouteChildren: MarketsSlugRouteChildren = {
+  MarketsSlugReviewRoute: MarketsSlugReviewRoute,
+}
+
+const MarketsSlugRouteWithChildren = MarketsSlugRoute._addFileChildren(
+  MarketsSlugRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountRoute: AccountRoute,
+  OnboardingRoute: OnboardingRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
+  ReviewSubmittedRoute: ReviewSubmittedRoute,
+  SigninRoute: SigninRoute,
+  SignupRoute: SignupRoute,
+  VerifyEmailRoute: VerifyEmailRoute,
+  MarketsSlugRoute: MarketsSlugRouteWithChildren,
+  AdminIndexRoute: AdminIndexRoute,
+  MarketsIndexRoute: MarketsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
