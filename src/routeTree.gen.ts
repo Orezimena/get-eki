@@ -17,6 +17,7 @@ import { Route as ReviewSubmittedRouteImport } from './routes/review-submitted'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as MarketsIndexRouteImport } from './routes/markets/index'
 import { Route as MarketsSlugRouteImport } from './routes/markets/$slug'
 import { Route as MarketsSlugReviewRouteImport } from './routes/markets/$slug.review'
@@ -61,6 +62,11 @@ const VerifyEmailRoute = VerifyEmailRouteImport.update({
   path: '/verify-email',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketsIndexRoute = MarketsIndexRouteImport.update({
   id: '/markets/',
   path: '/markets/',
@@ -87,6 +93,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
   '/markets/$slug': typeof MarketsSlugRouteWithChildren
+  '/admin/': typeof AdminIndexRoute
   '/markets/': typeof MarketsIndexRoute
   '/markets/$slug/review': typeof MarketsSlugReviewRoute
 }
@@ -100,6 +107,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
   '/markets/$slug': typeof MarketsSlugRouteWithChildren
+  '/admin': typeof AdminIndexRoute
   '/markets': typeof MarketsIndexRoute
   '/markets/$slug/review': typeof MarketsSlugReviewRoute
 }
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
   '/markets/$slug': typeof MarketsSlugRouteWithChildren
+  '/admin/': typeof AdminIndexRoute
   '/markets/': typeof MarketsIndexRoute
   '/markets/$slug/review': typeof MarketsSlugReviewRoute
 }
@@ -129,6 +138,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/verify-email'
     | '/markets/$slug'
+    | '/admin/'
     | '/markets/'
     | '/markets/$slug/review'
   fileRoutesByTo: FileRoutesByTo
@@ -142,6 +152,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/verify-email'
     | '/markets/$slug'
+    | '/admin'
     | '/markets'
     | '/markets/$slug/review'
   id:
@@ -155,6 +166,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/verify-email'
     | '/markets/$slug'
+    | '/admin/'
     | '/markets/'
     | '/markets/$slug/review'
   fileRoutesById: FileRoutesById
@@ -169,6 +181,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
   MarketsSlugRoute: typeof MarketsSlugRouteWithChildren
+  AdminIndexRoute: typeof AdminIndexRoute
   MarketsIndexRoute: typeof MarketsIndexRoute
 }
 
@@ -230,6 +243,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VerifyEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/markets/': {
       id: '/markets/'
       path: '/markets'
@@ -276,6 +296,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   VerifyEmailRoute: VerifyEmailRoute,
   MarketsSlugRoute: MarketsSlugRouteWithChildren,
+  AdminIndexRoute: AdminIndexRoute,
   MarketsIndexRoute: MarketsIndexRoute,
 }
 export const routeTree = rootRouteImport
