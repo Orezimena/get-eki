@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { computeStats, DIMENSIONS, feeRange, sortReviews } from "@/lib/eki";
+import { computeStats, DIMENSIONS, feeRange, organiserSlug, sortReviews } from "@/lib/eki";
 import { useApprovedReviews, useMarkets, useMyVotes } from "@/lib/queries";
 import { useAuth } from "@/lib/auth";
 

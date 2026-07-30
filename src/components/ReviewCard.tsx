@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 const returnStyles: Record<string, string> = {
   Yes: "bg-mint text-mint-foreground border-transparent",
   Maybe: "bg-amber text-amber-foreground border-transparent",
-  No: "bg-destructive text-destructive-foreground border-transparent",
+  No: "bg-destructive/85 text-destructive-foreground border-transparent",
 };
 
 export function ReviewCard({
