@@ -7,11 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { computeStats, DIMENSIONS, feeRange, sortReviews } from "@/lib/eki";
+import { computeStats, DIMENSIONS, feeRange, organiserSlug, sortReviews } from "@/lib/eki";
 import { useApprovedReviews, useMarkets, useMyVotes } from "@/lib/queries";
 import { useAuth } from "@/lib/auth";
 
-export const Route = createFileRoute("/markets/$slug")({
+export const Route = createFileRoute("/markets/$slug/")({
   head: () => ({
     meta: [
       { title: "Market profile — Eki" },
@@ -93,7 +93,19 @@ function MarketProfile() {
             <dt className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <User size={14} /> Organiser
             </dt>
-            <dd className="mt-0.5 font-semibold">{market.organiser ?? "—"}</dd>
+            <dd className="mt-0.5 font-semibold">
+              {market.organiser ? (
+                <Link
+                  to="/organisers/$slug"
+                  params={{ slug: organiserSlug(market.organiser) }}
+                  className="text-primary underline-offset-4 hover:underline"
+                >
+                  {market.organiser}
+                </Link>
+              ) : (
+                "—"
+              )}
+            </dd>
           </div>
           <div>
             <dt className="flex items-center gap-1.5 text-xs text-muted-foreground">

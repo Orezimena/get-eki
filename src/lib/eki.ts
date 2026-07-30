@@ -102,3 +102,11 @@ export function formatDate(date: string) {
     year: "numeric",
   });
 }
+
+export function organiserSlug(name: string) {
+  return name
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
