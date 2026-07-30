@@ -170,8 +170,8 @@ function ReviewForm() {
                 className={cn(
                   "flex-1 rounded-lg border px-4 py-2 text-sm font-semibold transition-colors",
                   wouldReturn === w
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border hover:border-primary hover:text-primary",
+                    ? "border-mint bg-mint text-mint-foreground"
+                    : "border-border hover:border-mint",
                 )}
               >
                 {w}

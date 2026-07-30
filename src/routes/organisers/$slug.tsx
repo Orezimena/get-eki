@@ -74,7 +74,7 @@ function OrganiserProfile() {
       </div>
 
       <section className="mt-8">
-        <h2 className="text-2xl font-extrabold text-primary">Markets by {name}</h2>
+        <h2 className="text-2xl font-extrabold text-foreground">Markets by {name}</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           {organiserMarkets.map((m) => (
             <MarketCard

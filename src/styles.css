@@ -44,6 +44,9 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-mint: var(--mint);
   --color-mint-foreground: var(--mint-foreground);
+  --color-mint-soft: var(--mint-soft);
+  --color-neutral-badge: var(--neutral-badge);
+  --color-neutral-badge-foreground: var(--neutral-badge-foreground);
   --color-amber: var(--amber);
   --color-amber-foreground: var(--amber-foreground);
   --color-destructive: var(--destructive);
@@ -87,9 +90,12 @@
   --accent-foreground: oklch(0.587 0.175 43);
   --mint: oklch(0.783 0.108 154);
   --mint-foreground: oklch(0.264 0 0);
+  --mint-soft: oklch(0.933 0.043 160);
+  --neutral-badge: oklch(0.844 0.011 95);
+  --neutral-badge-foreground: oklch(0.63 0 0);
   --amber: oklch(0.685 0.163 52);
   --amber-foreground: oklch(1 0 0);
-  --destructive: oklch(0.575 0.155 25);
+  --destructive: oklch(0.5455 0.178 28.5);
   --destructive-foreground: oklch(0.99 0 0);
   --border: oklch(0.9 0.004 60);
   --input: oklch(0.9 0.004 60);
@@ -119,6 +125,9 @@
   --accent-foreground: oklch(0.97 0 0);
   --mint: oklch(0.5 0.09 155);
   --mint-foreground: oklch(0.97 0 0);
+  --mint-soft: oklch(0.32 0.04 160);
+  --neutral-badge: oklch(0.32 0.005 95);
+  --neutral-badge-foreground: oklch(0.72 0 0);
   --amber: oklch(0.55 0.1 80);
   --amber-foreground: oklch(0.97 0 0);
   --destructive: oklch(0.65 0.19 27);
