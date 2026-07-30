@@ -11,7 +11,7 @@ import { computeStats, DIMENSIONS, feeRange, sortReviews } from "@/lib/eki";
 import { useApprovedReviews, useMarkets, useMyVotes } from "@/lib/queries";
 import { useAuth } from "@/lib/auth";
 
-export const Route = createFileRoute("/markets/$slug")({
+export const Route = createFileRoute("/markets/$slug/")({
   head: () => ({
     meta: [
       { title: "Market profile — Eki" },

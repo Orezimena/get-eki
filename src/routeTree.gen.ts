@@ -19,7 +19,7 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as MarketsIndexRouteImport } from './routes/markets/index'
-import { Route as MarketsSlugRouteImport } from './routes/markets/$slug'
+import { Route as MarketsSlugIndexRouteImport } from './routes/markets/$slug.index'
 import { Route as MarketsSlugReviewRouteImport } from './routes/markets/$slug.review'
 
 const IndexRoute = IndexRouteImport.update({
@@ -72,15 +72,15 @@ const MarketsIndexRoute = MarketsIndexRouteImport.update({
   path: '/markets/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MarketsSlugRoute = MarketsSlugRouteImport.update({
-  id: '/markets/$slug',
-  path: '/markets/$slug',
+const MarketsSlugIndexRoute = MarketsSlugIndexRouteImport.update({
+  id: '/markets/$slug/',
+  path: '/markets/$slug/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MarketsSlugReviewRoute = MarketsSlugReviewRouteImport.update({
-  id: '/review',
-  path: '/review',
-  getParentRoute: () => MarketsSlugRoute,
+  id: '/markets/$slug/review',
+  path: '/markets/$slug/review',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -92,10 +92,10 @@ export interface FileRoutesByFullPath {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
-  '/markets/$slug': typeof MarketsSlugRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/markets/': typeof MarketsIndexRoute
   '/markets/$slug/review': typeof MarketsSlugReviewRoute
+  '/markets/$slug/': typeof MarketsSlugIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -106,10 +106,10 @@ export interface FileRoutesByTo {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
-  '/markets/$slug': typeof MarketsSlugRouteWithChildren
   '/admin': typeof AdminIndexRoute
   '/markets': typeof MarketsIndexRoute
   '/markets/$slug/review': typeof MarketsSlugReviewRoute
+  '/markets/$slug': typeof MarketsSlugIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -121,10 +121,10 @@ export interface FileRoutesById {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
-  '/markets/$slug': typeof MarketsSlugRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/markets/': typeof MarketsIndexRoute
   '/markets/$slug/review': typeof MarketsSlugReviewRoute
+  '/markets/$slug/': typeof MarketsSlugIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -137,10 +137,10 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/verify-email'
-    | '/markets/$slug'
     | '/admin/'
     | '/markets/'
     | '/markets/$slug/review'
+    | '/markets/$slug/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -151,10 +151,10 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/verify-email'
-    | '/markets/$slug'
     | '/admin'
     | '/markets'
     | '/markets/$slug/review'
+    | '/markets/$slug'
   id:
     | '__root__'
     | '/'
@@ -165,10 +165,10 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/verify-email'
-    | '/markets/$slug'
     | '/admin/'
     | '/markets/'
     | '/markets/$slug/review'
+    | '/markets/$slug/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -180,9 +180,10 @@ export interface RootRouteChildren {
   SigninRoute: typeof SigninRoute
   SignupRoute: typeof SignupRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
-  MarketsSlugRoute: typeof MarketsSlugRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
   MarketsIndexRoute: typeof MarketsIndexRoute
+  MarketsSlugReviewRoute: typeof MarketsSlugReviewRoute
+  MarketsSlugIndexRoute: typeof MarketsSlugIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -257,34 +258,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MarketsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/markets/$slug': {
-      id: '/markets/$slug'
+    '/markets/$slug/': {
+      id: '/markets/$slug/'
       path: '/markets/$slug'
-      fullPath: '/markets/$slug'
-      preLoaderRoute: typeof MarketsSlugRouteImport
+      fullPath: '/markets/$slug/'
+      preLoaderRoute: typeof MarketsSlugIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/markets/$slug/review': {
       id: '/markets/$slug/review'
-      path: '/review'
+      path: '/markets/$slug/review'
       fullPath: '/markets/$slug/review'
       preLoaderRoute: typeof MarketsSlugReviewRouteImport
-      parentRoute: typeof MarketsSlugRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
-
-interface MarketsSlugRouteChildren {
-  MarketsSlugReviewRoute: typeof MarketsSlugReviewRoute
-}
-
-const MarketsSlugRouteChildren: MarketsSlugRouteChildren = {
-  MarketsSlugReviewRoute: MarketsSlugReviewRoute,
-}
-
-const MarketsSlugRouteWithChildren = MarketsSlugRoute._addFileChildren(
-  MarketsSlugRouteChildren,
-)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -295,10 +284,21 @@ const rootRouteChildren: RootRouteChildren = {
   SigninRoute: SigninRoute,
   SignupRoute: SignupRoute,
   VerifyEmailRoute: VerifyEmailRoute,
-  MarketsSlugRoute: MarketsSlugRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
   MarketsIndexRoute: MarketsIndexRoute,
+  MarketsSlugReviewRoute: MarketsSlugReviewRoute,
+  MarketsSlugIndexRoute: MarketsSlugIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
