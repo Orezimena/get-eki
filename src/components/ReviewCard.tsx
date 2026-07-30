@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 const returnStyles: Record<string, string> = {
   Yes: "bg-mint text-mint-foreground border-transparent",
   Maybe: "bg-amber text-amber-foreground border-transparent",
-  No: "bg-destructive/85 text-destructive-foreground border-transparent",
+  No: "bg-destructive text-destructive-foreground border-transparent",
 };
 
 export function ReviewCard({
@@ -84,8 +84,9 @@ export function ReviewCard({
 
       <div className="mt-4 flex items-center gap-2 border-t border-border pt-3">
         <Button
-          variant={hasVoted ? "default" : "outline"}
+          variant="outline"
           size="sm"
+          className={cn(hasVoted && "border-transparent bg-mint text-mint-foreground hover:bg-mint/85")}
           onClick={upvote}
           disabled={hasVoted || busy}
         >

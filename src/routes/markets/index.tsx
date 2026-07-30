@@ -98,7 +98,7 @@ function MarketsPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
-      <h1 className="text-3xl font-extrabold sm:text-4xl">Market directory</h1>
+      <h1 className="text-3xl font-extrabold text-foreground sm:text-4xl">Market directory</h1>
       <p className="mt-1 text-muted-foreground">
         {markets?.length ?? 0} UK popup markets, rated by traders.
       </p>
@@ -130,8 +130,8 @@ function MarketsPage() {
                   }
                   className={
                     on
-                      ? "rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground"
-                      : "rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground hover:border-primary hover:text-primary"
+                      ? "rounded-full bg-mint px-3 py-1 text-xs font-medium text-mint-foreground"
+                      : "rounded-full border border-border px-3 py-1 text-xs font-medium text-muted-foreground hover:border-mint hover:text-foreground"
                   }
                 >
                   {t}
@@ -190,7 +190,7 @@ function MarketsPage() {
       {pills.length > 0 && (
         <div className="mt-4 flex flex-wrap items-center gap-2">
           {pills.map((p) => (
-            <Badge key={p.label} variant="secondary" className="gap-1 py-1 pr-1 pl-3">
+            <Badge key={p.label} className="gap-1 border-transparent bg-mint py-1 pr-1 pl-3 text-mint-foreground">
               {p.label}
               <button
                 type="button"

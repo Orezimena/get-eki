@@ -69,7 +69,7 @@ function MarketProfile() {
       <div className="eki-panel p-6 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <Badge variant="secondary">{market.type}</Badge>
+            <Badge className="border-transparent bg-secondary text-secondary-foreground">{market.type}</Badge>
             <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">{market.name}</h1>
             <p className="mt-2 flex items-center gap-1.5 text-muted-foreground">
               <MapPin size={16} /> {market.location}, {market.city} · {market.region}
@@ -122,7 +122,7 @@ function MarketProfile() {
             <p className="text-xs text-muted-foreground">Categories accepted</p>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {market.categories_accepted.map((c) => (
-                <Badge key={c} variant="outline">
+                <Badge key={c} className="border-transparent bg-mint text-mint-foreground">
                   {c}
                 </Badge>
               ))}
@@ -138,7 +138,7 @@ function MarketProfile() {
               <span className="text-5xl font-extrabold text-primary">{stats.overall?.toFixed(1)}</span>
               <div>
                 <StarRating value={stats.overall ?? 0} size={20} />
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="mt-1 text-sm text-foreground">
                   Based on {stats.reviewCount} approved trader reviews
                 </p>
               </div>
@@ -165,7 +165,7 @@ function MarketProfile() {
           </section>
 
           <section className="mt-8 space-y-4">
-            <h2 className="text-2xl font-extrabold">Trader reviews</h2>
+            <h2 className="text-2xl font-extrabold text-foreground">Trader reviews</h2>
             {marketReviews.map((r) => (
               <ReviewCard
                 key={r.id}
@@ -177,11 +177,11 @@ function MarketProfile() {
           </section>
         </>
       ) : (
-        <div className="eki-panel mt-6 p-10 text-center">
+        <div className="mt-6 rounded-xl border border-border border-l-4 border-l-mint bg-mint-soft p-10 text-center text-foreground">
           <p className="font-medium">
             {stats.reviewCount === 0
               ? "No reviews yet — be the first to review this market"
-              : `${stats.reviewCount} trader${stats.reviewCount === 1 ? " has" : "s have"} reviewed this market. Reviews will be visible once 5 reviews are in.`}
+              : `${stats.reviewCount} of 5 reviews needed — ${stats.reviewCount} trader${stats.reviewCount === 1 ? " has" : "s have"} reviewed this market. Reviews will be visible once 5 reviews are in.`}
           </p>
           <Button className="mt-4" asChild>
             <Link to="/markets/$slug/review" params={{ slug: market.slug }}>
