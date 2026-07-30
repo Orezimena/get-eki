@@ -98,7 +98,7 @@ function MarketProfile() {
                 <Link
                   to="/organisers/$slug"
                   params={{ slug: organiserSlug(market.organiser) }}
-                  className="text-primary underline-offset-4 hover:underline"
+                  className="text-mint-foreground underline decoration-mint decoration-2 underline-offset-4 hover:text-primary"
                 >
                   {market.organiser}
                 </Link>
@@ -135,7 +135,7 @@ function MarketProfile() {
         <>
           <section className="eki-panel mt-6 p-6 sm:p-8">
             <div className="flex flex-wrap items-center gap-4">
-              <span className="text-5xl font-extrabold text-primary">{stats.overall?.toFixed(1)}</span>
+              <span className="text-5xl font-extrabold text-foreground">{stats.overall?.toFixed(1)}</span>
               <div>
                 <StarRating value={stats.overall ?? 0} size={20} />
                 <p className="mt-1 text-sm text-foreground">
