@@ -1,8 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DIMENSIONS, formatDate } from "@/lib/eki";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,18 +31,24 @@ function Admin() {
   const { data: markets } = useMarkets();
   const { data: pending, isLoading } = usePendingReviews(isAdmin);
 
-  if (!loading && !user) {
+  if (loading) {
     return (
-      <Gate title="Sign in to access moderation">
-        <Button asChild>
-          <Link to="/signin">Sign in</Link>
-        </Button>
-      </Gate>
+      <div className="mx-auto max-w-5xl px-4 py-10">
+        <Skeleton className="h-32 rounded-xl" />
+      </div>
     );
   }
 
-  if (!loading && !isAdmin) {
-    return <Gate title="You don't have moderation access" />;
+  if (!user) return <AdminLogin />;
+
+  if (!isAdmin) {
+    return (
+      <Gate title="Access denied">
+        <p className="text-sm text-muted-foreground">
+          Access denied. This area is for Eki admins only.
+        </p>
+      </Gate>
+    );
   }
 
   async function decide(id: string, approve: boolean) {
@@ -53,7 +62,7 @@ function Admin() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10">
-      <h1 className="text-3xl font-extrabold">Moderation queue</h1>
+      <h1 className="text-3xl font-extrabold text-foreground">Moderation queue</h1>
       <p className="mt-1 text-muted-foreground">Pending reviews waiting to go live.</p>
 
       <div className="mt-6 space-y-4">
@@ -73,15 +82,19 @@ function Admin() {
             <article key={r.id} className="eki-panel p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-lg font-bold">{market?.name ?? "Unknown market"}</h2>
+                  <h2 className="text-lg font-bold text-foreground">
+                    {market?.name ?? "Unknown market"}
+                  </h2>
                   <p className="mt-1 text-sm text-muted-foreground">
                     Traded {formatDate(r.trading_date)} · Submitted {formatDate(r.created_at)}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="secondary">{r.product_category}</Badge>
+                  <Badge className="border-transparent bg-mint text-mint-foreground">
+                    {r.product_category}
+                  </Badge>
                   {r.trading_region && <Badge variant="outline">{r.trading_region}</Badge>}
-                  <Badge className="bg-primary text-primary-foreground">
+                  <Badge className="border-transparent bg-secondary text-secondary-foreground">
                     {overall.toFixed(1)}/5
                   </Badge>
                 </div>
@@ -92,10 +105,14 @@ function Admin() {
               )}
 
               <div className="mt-4 flex gap-2 border-t border-border pt-3">
-                <Button size="sm" onClick={() => decide(r.id, true)}>
+                <Button
+                  size="sm"
+                  className="bg-mint text-mint-foreground hover:bg-mint/85"
+                  onClick={() => decide(r.id, true)}
+                >
                   Approve
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => decide(r.id, false)}>
+                <Button size="sm" variant="destructive" onClick={() => decide(r.id, false)}>
                   Reject
                 </Button>
               </div>
@@ -107,11 +124,59 @@ function Admin() {
   );
 }
 
+function AdminLogin() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setBusy(false);
+    if (error) return toast.error("Access denied. This area is for Eki admins only.");
+  }
+
+  return (
+    <div className="mx-auto max-w-md px-4 py-20">
+      <form onSubmit={submit} className="eki-panel space-y-4 p-8">
+        <h1 className="text-2xl font-extrabold text-foreground">Admin sign in</h1>
+        <p className="text-sm text-muted-foreground">
+          The moderation queue is restricted to Eki admins.
+        </p>
+        <div className="space-y-1.5">
+          <Label htmlFor="admin-email">Email</Label>
+          <Input
+            id="admin-email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="admin-password">Password</Label>
+          <Input
+            id="admin-password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <Button type="submit" className="w-full" disabled={busy}>
+          {busy ? "Signing in…" : "Sign in"}
+        </Button>
+      </form>
+    </div>
+  );
+}
+
 function Gate({ title, children }: { title: string; children?: React.ReactNode }) {
   return (
     <div className="mx-auto max-w-md px-4 py-20 text-center">
       <div className="eki-panel space-y-4 p-8">
-        <h1 className="text-2xl font-extrabold">{title}</h1>
+        <h1 className="text-2xl font-extrabold text-foreground">{title}</h1>
         {children}
       </div>
     </div>
