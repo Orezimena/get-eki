@@ -82,15 +82,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Eki — Market intelligence for UK traders" },
+      { title: "Eki |Trusted reviews for popup markets in UK" },
       {
         name: "description",
         content:
-          "Anonymous reviews of UK popup markets, written by the traders who work them.",
+          "For market traders who mean business. Anonymous reviews of UK popup markets, written by the traders who trade there",
       },
       { name: "author", content: "Eki" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:title", content: "Eki |Trusted reviews for popup markets in UK" },
+      { name: "twitter:title", content: "Eki |Trusted reviews for popup markets in UK" },
+      { property: "og:description", content: "For market traders who mean business. Anonymous reviews of UK popup markets, written by the traders who trade there" },
+      { name: "twitter:description", content: "For market traders who mean business. Anonymous reviews of UK popup markets, written by the traders who trade there" },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f7afb349-c414-49cf-aebd-50125bd4f311/id-preview-7ece7403--6db3ee50-4cd5-4345-8749-309256eda63b.lovable.app-1785754395407.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/f7afb349-c414-49cf-aebd-50125bd4f311/id-preview-7ece7403--6db3ee50-4cd5-4345-8749-309256eda63b.lovable.app-1785754395407.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

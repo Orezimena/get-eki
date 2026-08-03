@@ -10,16 +10,16 @@ import { useApprovedReviews, useMarkets } from "@/lib/queries";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Eki — Market intelligence for UK popup traders" },
+      { title: "Eki |Trusted reviews for popup markets in UK" },
       {
         name: "description",
         content:
-          "For market traders who mean business. Anonymous reviews of UK popup markets, written by the traders who work them.",
+          "For market traders who mean business. Anonymous reviews of UK popup markets, written by the traders who trade there",
       },
-      { property: "og:title", content: "Eki — For market traders who mean business" },
+      { property: "og:title", content: "Eki |Trusted reviews for popup markets in UK" },
       {
         property: "og:description",
-        content: "See real footfall, spend and organiser ratings before you book your next stall.",
+        content: "For market traders who mean business. Anonymous reviews of UK popup markets, written by the traders who trade there",
       },
     ],
   }),
