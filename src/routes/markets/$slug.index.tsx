@@ -27,7 +27,7 @@ export const Route = createFileRoute("/markets/$slug/")({
   component: MarketProfile,
   errorComponent: ({ error }) => (
     <div className="mx-auto max-w-md px-4 py-20 text-center" role="alert">
-      <p className="font-medium">{error.message}</p>
+      <p className="font-medium">{error instanceof Error ? error.message : "Something went wrong"}</p>
     </div>
   ),
   notFoundComponent: () => (
