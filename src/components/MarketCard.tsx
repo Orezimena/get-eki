@@ -12,7 +12,9 @@ export function MarketCard({ market, stats }: { market: Market; stats: MarketSta
       className="eki-panel group flex flex-col gap-3 p-5 transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-lift)]"
     >
       <div className="flex items-start justify-between gap-3">
-        <h3 className="text-lg leading-snug font-bold text-foreground group-hover:text-primary">{market.name}</h3>
+        <h3 className="text-lg leading-snug font-bold text-foreground group-hover:text-primary">
+          {market.name}
+        </h3>
         <Badge className="shrink-0 border-transparent bg-mint text-mint-foreground">
           {market.type}
         </Badge>
@@ -29,12 +31,16 @@ export function MarketCard({ market, stats }: { market: Market; stats: MarketSta
         {stats.rated ? (
           <span className="flex items-center gap-2">
             <StarRating value={stats.overall ?? 0} />
-            <span className="text-sm font-semibold text-foreground">{stats.overall?.toFixed(1)}</span>
-            <span className="text-xs text-muted-foreground">({stats.reviewCount})</span>
+            <span className="text-sm font-semibold text-foreground">
+              {stats.overall?.toFixed(1)}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              ({stats.reviewCount} {stats.reviewCount === 1 ? "review" : "reviews"})
+            </span>
           </span>
         ) : (
           <span className="rounded-full bg-neutral-badge px-2.5 py-1 text-xs font-medium text-neutral-badge-foreground">
-            Not yet rated
+            No reviews yet
           </span>
         )}
       </div>
