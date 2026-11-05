@@ -27,7 +27,9 @@ export const Route = createFileRoute("/markets/$slug/")({
   component: MarketProfile,
   errorComponent: ({ error }) => (
     <div className="mx-auto max-w-md px-4 py-20 text-center" role="alert">
-      <p className="font-medium">{error instanceof Error ? error.message : "Something went wrong"}</p>
+      <p className="font-medium">
+        {error instanceof Error ? error.message : "Something went wrong"}
+      </p>
     </div>
   ),
   notFoundComponent: () => (
@@ -71,7 +73,9 @@ function MarketProfile() {
       <div className="eki-panel p-6 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <Badge className="border-transparent bg-secondary text-secondary-foreground">{market.type}</Badge>
+            <Badge className="border-transparent bg-secondary text-secondary-foreground">
+              {market.type}
+            </Badge>
             <h1 className="mt-2 text-3xl font-extrabold sm:text-4xl">{market.name}</h1>
             <p className="mt-2 flex items-center gap-1.5 text-muted-foreground">
               <MapPin size={16} /> {market.location}, {market.city} · {market.region}
@@ -137,16 +141,21 @@ function MarketProfile() {
         <>
           <section className="eki-panel mt-6 p-6 sm:p-8">
             <div className="flex flex-wrap items-center gap-4">
-              <span className="text-5xl font-extrabold text-foreground">{stats.overall?.toFixed(1)}</span>
+              <span className="text-5xl font-extrabold text-foreground">
+                {stats.overall?.toFixed(1)}
+              </span>
               <div>
                 <StarRating value={stats.overall ?? 0} size={20} />
                 <p className="mt-1 text-sm text-foreground">
-                  Based on {stats.reviewCount} approved trader reviews
+                  Based on {stats.reviewCount} {stats.reviewCount === 1 ? "review" : "reviews"}
                 </p>
               </div>
               <div className="ml-auto rounded-xl bg-mint px-4 py-3 text-center text-mint-foreground">
                 <p className="text-2xl font-extrabold">{stats.wouldReturnPct}%</p>
                 <p className="text-xs font-medium">would return</p>
+                <p className="text-xs">
+                  Based on {stats.reviewCount} {stats.reviewCount === 1 ? "review" : "reviews"}
+                </p>
               </div>
             </div>
 
@@ -183,11 +192,7 @@ function MarketProfile() {
         </>
       ) : (
         <div className="mt-6 rounded-xl border border-border border-l-4 border-l-mint bg-mint-soft p-10 text-center text-foreground">
-          <p className="font-medium">
-            {stats.reviewCount === 0
-              ? "No reviews yet — be the first to review this market"
-              : `${stats.reviewCount} of 5 reviews needed — ${stats.reviewCount} trader${stats.reviewCount === 1 ? " has" : "s have"} reviewed this market. Reviews will be visible once 5 reviews are in.`}
-          </p>
+          <p className="font-medium">No reviews yet — be the first to review this market</p>
           <Button className="mt-4" asChild>
             <Link to="/markets/$slug/review" params={{ slug: market.slug }}>
               Leave a review

@@ -19,7 +19,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Eki |Trusted reviews for popup markets in UK" },
       {
         property: "og:description",
-        content: "For market traders who mean business. Anonymous reviews of UK popup markets, written by the traders who trade there",
+        content:
+          "For market traders who mean business. Anonymous reviews of UK popup markets, written by the traders who trade there",
       },
     ],
   }),
@@ -72,9 +73,21 @@ function Index() {
       <section className="mx-auto max-w-6xl px-4 py-12">
         <div className="grid gap-4 sm:grid-cols-3">
           {[
-            { icon: EyeOff, title: "Fully anonymous", body: "Reviews never show trader names or businesses." },
-            { icon: TrendingUp, title: "Five real dimensions", body: "Footfall, spend power, comms, fees and logistics." },
-            { icon: ShieldCheck, title: "Five-review threshold", body: "Scores only appear once five traders have spoken." },
+            {
+              icon: EyeOff,
+              title: "Fully anonymous",
+              body: "Reviews never show trader names or businesses.",
+            },
+            {
+              icon: TrendingUp,
+              title: "Five real dimensions",
+              body: "Footfall, spend power, comms, fees and logistics.",
+            },
+            {
+              icon: ShieldCheck,
+              title: "Approved trader reviews",
+              body: "Every approved review counts, starting with the first.",
+            },
           ].map(({ icon: Icon, title, body }) => (
             <div key={title} className="eki-panel p-5">
               <Icon className="text-primary" />
@@ -90,7 +103,7 @@ function Index() {
           <div>
             <h2 className="text-2xl font-extrabold sm:text-3xl">Top rated markets</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Markets with five or more approved reviews, best score first.
+              Markets with approved reviews, best score first.
             </p>
           </div>
           <Button variant="ghost" asChild>
@@ -102,7 +115,9 @@ function Index() {
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {isLoading
-            ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-40 rounded-xl" />)
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-40 rounded-xl" />
+              ))
             : top.map(({ market, stats }) => (
                 <MarketCard key={market.id} market={market} stats={stats} />
               ))}

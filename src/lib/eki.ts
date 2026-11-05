@@ -4,8 +4,6 @@ export type Market = Database["public"]["Tables"]["markets"]["Row"];
 export type Review = Database["public"]["Tables"]["reviews"]["Row"];
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
-export const REVIEW_THRESHOLD = 5;
-
 export const DIMENSIONS = [
   { key: "footfall_quality", label: "Footfall quality" },
   { key: "crowd_spend_power", label: "Crowd spend power" },
@@ -54,20 +52,27 @@ export type MarketStats = {
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
 export function computeStats(reviews: Review[]): MarketStats {
-  const count = reviews.length;
-  if (count < REVIEW_THRESHOLD) {
-    return { reviewCount: count, rated: false, overall: null, dimensions: null, wouldReturnPct: null };
+  const approved = reviews.filter((review) => review.status === "approved");
+  const count = approved.length;
+  if (count === 0) {
+    return {
+      reviewCount: count,
+      rated: false,
+      overall: null,
+      dimensions: null,
+      wouldReturnPct: null,
+    };
   }
 
   const dimensions = {} as Record<DimensionKey, number>;
   let total = 0;
   for (const d of DIMENSIONS) {
-    const mean = reviews.reduce((sum, r) => sum + r[d.key], 0) / count;
+    const mean = approved.reduce((sum, r) => sum + r[d.key], 0) / count;
     dimensions[d.key] = round1(mean);
     total += mean;
   }
 
-  const yes = reviews.filter((r) => r.would_return === "Yes").length;
+  const yes = approved.filter((r) => r.would_return === "Yes").length;
 
   return {
     reviewCount: count,
@@ -87,7 +92,11 @@ export function sortReviews(reviews: Review[]): Review[] {
 }
 
 export const gbp = (n: number) =>
-  new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(n);
+  new Intl.NumberFormat("en-GB", {
+    style: "currency",
+    currency: "GBP",
+    maximumFractionDigits: 0,
+  }).format(n);
 
 export function feeRange(market: Pick<Market, "stall_fee_min" | "stall_fee_max">) {
   return market.stall_fee_min === market.stall_fee_max
