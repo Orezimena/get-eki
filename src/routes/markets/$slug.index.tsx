@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { CalendarDays, MapPin, PoundSterling, User } from "lucide-react";
 import { useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { ReviewCard } from "@/components/ReviewCard";
 import { StarRating } from "@/components/StarRating";
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +46,7 @@ function MarketProfile() {
   const { data: markets, isLoading } = useMarkets();
   const { data: reviews } = useApprovedReviews();
   const { data: votes } = useMyVotes(user?.id);
+  const queryClient = useQueryClient();
 
   const market = markets?.find((m) => m.slug === slug);
   const marketReviews = useMemo(
@@ -171,7 +173,10 @@ function MarketProfile() {
                 key={r.id}
                 review={r}
                 voted={(votes ?? []).includes(r.id)}
-                onVoted={() => {}}
+                onVoted={() => {
+                  void queryClient.invalidateQueries({ queryKey: ["review_votes", user?.id] });
+                  void queryClient.invalidateQueries({ queryKey: ["reviews", "approved"] });
+                }}
               />
             ))}
           </section>

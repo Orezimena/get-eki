@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Flag, ThumbsUp } from "lucide-react";
 import { toast } from "sonner";
 import { DIMENSIONS, FLAG_REASONS, formatDate, type Review } from "@/lib/eki";
@@ -35,17 +35,40 @@ export function ReviewCard({
   const [hasVoted, setHasVoted] = useState(voted);
   const [busy, setBusy] = useState(false);
 
-  async function upvote() {
+  // Keep local state in step with fresh data after a refetch.
+  useEffect(() => setCount(review.helpful_count), [review.helpful_count]);
+  useEffect(() => setHasVoted(voted), [voted]);
+
+  async function toggleVote() {
     if (!user) return toast.error("Sign in to mark reviews as helpful");
-    if (hasVoted || busy) return;
+    if (busy) return;
     setBusy(true);
-    const { error } = await supabase
-      .from("review_votes")
-      .insert({ review_id: review.id, user_id: user.id });
-    setBusy(false);
-    if (error) return toast.error("Could not register your vote");
-    setHasVoted(true);
-    setCount((c) => c + 1);
+    if (hasVoted) {
+      const { data, error } = await supabase
+        .from("review_votes")
+        .delete()
+        .eq("review_id", review.id)
+        .eq("user_id", user.id)
+        .select("id");
+      setBusy(false);
+      if (error || !data?.length) {
+        onVoted();
+        return toast.error("Could not remove your vote");
+      }
+      setHasVoted(false);
+      setCount((c) => Math.max(c - 1, 0));
+    } else {
+      const { error } = await supabase
+        .from("review_votes")
+        .insert({ review_id: review.id, user_id: user.id });
+      setBusy(false);
+      if (error) {
+        onVoted();
+        return toast.error("Could not register your vote");
+      }
+      setHasVoted(true);
+      setCount((c) => c + 1);
+    }
     onVoted();
   }
 
@@ -87,8 +110,9 @@ export function ReviewCard({
           variant="outline"
           size="sm"
           className={cn(hasVoted && "border-transparent bg-mint text-mint-foreground hover:bg-mint/85")}
-          onClick={upvote}
-          disabled={hasVoted || busy}
+          onClick={toggleVote}
+          disabled={busy}
+          aria-pressed={hasVoted}
         >
           <ThumbsUp size={14} className={cn(hasVoted && "fill-current")} />
           Helpful ({count})
