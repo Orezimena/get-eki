@@ -1,9 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, EyeOff, ShieldCheck, TrendingUp } from "lucide-react";
 import { useMemo } from "react";
-import { MarketCard } from "@/components/MarketCard";
+import { TopRatedMarkets } from "@/components/TopRatedMarkets";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { computeStats } from "@/lib/eki";
 import { useApprovedReviews, useMarkets } from "@/lib/queries";
 
@@ -28,8 +27,10 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { data: markets, isLoading } = useMarkets();
-  const { data: reviews } = useApprovedReviews();
+  const marketsQuery = useMarkets();
+  const reviewsQuery = useApprovedReviews();
+  const { data: markets } = marketsQuery;
+  const { data: reviews } = reviewsQuery;
 
   const top = useMemo(() => {
     if (!markets || !reviews) return [];
@@ -113,15 +114,11 @@ function Index() {
           </Button>
         </div>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {isLoading
-            ? Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-40 rounded-xl" />
-              ))
-            : top.map(({ market, stats }) => (
-                <MarketCard key={market.id} market={market} stats={stats} />
-              ))}
-        </div>
+        <TopRatedMarkets
+          markets={top}
+          isPending={marketsQuery.isPending || reviewsQuery.isPending}
+          isError={marketsQuery.isError || reviewsQuery.isError}
+        />
       </section>
     </>
   );

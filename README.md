@@ -71,3 +71,5 @@ npm run dev
 ## Review calculation checks
 
 With Node.js 24, run `node tests/eki.test.mjs` to check zero, one and multiple approved reviews, pending/rejected exclusion, return percentages and review sorting. These checks use local fixtures and do not connect to Supabase.
+
+Run `bun test tests/top-rated-markets.test.tsx` for homepage rendering checks covering successful empty results, loading, failed requests and populated market cards. These also use local fixtures.
