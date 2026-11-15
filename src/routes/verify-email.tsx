@@ -1,17 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { MailCheck } from "lucide-react";
-import { z } from "zod";
-import { safeReturnTo } from "@/lib/auth-flow";
-import { Button } from "@/components/ui/button";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { authSearch } from "@/lib/auth-flow";
+import { pendingVerification, createVerificationResend } from "@/lib/verification-email";
+import { supabase } from "@/integrations/supabase/client";
+import { VerificationEmailPanel } from "@/components/VerificationEmailPanel";
 
 export const Route = createFileRoute("/verify-email")({
-  validateSearch: z.object({
-    email: z.string().optional(),
-    returnTo: z
-      .unknown()
-      .optional()
-      .transform((value) => safeReturnTo(value)),
-  }),
+  validateSearch: authSearch,
   head: () => ({
     meta: [
       { title: "Verify your email — Eki" },
@@ -24,23 +19,30 @@ export const Route = createFileRoute("/verify-email")({
 });
 
 function VerifyEmail() {
-  const { email, returnTo } = Route.useSearch();
+  const { returnTo } = Route.useSearch();
+  const navigate = useNavigate();
+  const [resend] = useState(() =>
+    createVerificationResend({
+      storage: pendingVerification,
+      resend: (request) => supabase.auth.resend(request),
+    }),
+  );
+  const state = useSyncExternalStore(resend.subscribe, resend.getSnapshot, resend.getSnapshot);
+  useEffect(() => {
+    // Remove legacy email query parameters from the current history entry too.
+    if (new URLSearchParams(window.location.search).has("email")) {
+      void navigate({ to: "/verify-email", search: { returnTo }, replace: true });
+    }
+    resend.tick();
+    const timer = window.setInterval(resend.tick, 1000);
+    return () => window.clearInterval(timer);
+  }, [resend, returnTo, navigate]);
 
   return (
-    <div className="mx-auto max-w-md px-4 py-20 text-center">
-      <div className="eki-panel p-8">
-        <MailCheck className="mx-auto text-primary" size={44} />
-        <h1 className="mt-4 text-2xl font-extrabold">Check your email to verify your account</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          We've sent a verification link{email ? ` to ${email}` : ""}. Click it and you'll be taken
-          straight to setting up your trader profile.
-        </p>
-        <Button variant="outline" className="mt-6" asChild>
-          <Link to="/signin" search={{ returnTo }}>
-            Back to sign in
-          </Link>
-        </Button>
-      </div>
-    </div>
+    <VerificationEmailPanel
+      state={state}
+      returnTo={returnTo}
+      onResend={() => void resend.submit()}
+    />
   );
 }
