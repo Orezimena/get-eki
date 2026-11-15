@@ -1,81 +1,91 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import type { Session, User } from "@supabase/supabase-js";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import type { Profile } from "./eki";
+import { createAuthState, type AuthState } from "./auth-state";
 
-type AuthValue = {
+export type AuthValue = AuthState & {
   user: User | null;
-  session: Session | null;
-  profile: Profile | null;
-  isAdmin: boolean;
-  loading: boolean;
   refreshProfile: () => Promise<void>;
+  retry: () => Promise<void>;
+  saveProfile: (category: string, region: string) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
-const AuthContext = createContext<AuthValue>({
-  user: null,
-  session: null,
-  profile: null,
-  isAdmin: false,
-  loading: true,
-  refreshProfile: async () => {},
-  signOut: async () => {},
-});
+export const AuthContext = createContext<AuthValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  const user = session?.user ?? null;
-
-  async function load(userId: string) {
-    const [{ data: p }, { data: roles }] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
-      supabase.from("user_roles").select("role").eq("user_id", userId),
-    ]);
-    setProfile(p ?? null);
-    setIsAdmin((roles ?? []).some((r) => r.role === "admin"));
-  }
-
-  useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
-      setSession(next);
-      if (next?.user) {
-        setTimeout(() => void load(next.user.id), 0);
-      } else {
-        setProfile(null);
-        setIsAdmin(false);
-      }
-    });
-
-    supabase.auth.getSession().then(async ({ data }) => {
-      setSession(data.session);
-      if (data.session?.user) await load(data.session.user.id);
-      setLoading(false);
-    });
-
-    return () => sub.subscription.unsubscribe();
-  }, []);
+  const queryClient = useQueryClient();
+  const [store] = useState(() =>
+    createAuthState({
+      getSession: async () => {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        return data.session;
+      },
+      onSession: (listener) => {
+        const { data } = supabase.auth.onAuthStateChange((_event, session) => listener(session));
+        return () => data.subscription.unsubscribe();
+      },
+      loadProfile: async (id) => {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", id)
+          .maybeSingle();
+        if (error) throw error;
+        return data;
+      },
+      loadAdmin: async (id) => {
+        const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", id);
+        if (error) throw error;
+        return (data ?? []).some((role) => role.role === "admin");
+      },
+      saveProfile: async (id, exists, fields) => {
+        const table = supabase.from("profiles");
+        const mutation = exists
+          ? table.update(fields).eq("id", id)
+          : table.insert({ id, ...fields });
+        // single() rejects zero-row saves, including rows filtered out by RLS.
+        const { data, error } = await mutation.select("*").single();
+        if (error)
+          throw new Error(
+            "We couldn't save your profile. Please try again. If this continues, contact support.",
+          );
+        return data;
+      },
+      signOut: async () => {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+      },
+      clearPrivateData: () => {
+        const privateQuery = (query: { queryKey: readonly unknown[] }) =>
+          query.queryKey[0] === "review_votes" ||
+          (query.queryKey[0] === "reviews" && query.queryKey[1] !== "approved");
+        void queryClient.cancelQueries({ predicate: privateQuery });
+        queryClient.removeQueries({ predicate: privateQuery });
+      },
+    }),
+  );
+  const state = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
+  useEffect(() => store.start(), [store]);
 
   return (
     <AuthContext.Provider
       value={{
-        user,
-        session,
-        profile,
-        isAdmin,
-        loading,
-        refreshProfile: async () => {
-          if (user) await load(user.id);
-        },
-        signOut: async () => {
-          await supabase.auth.signOut();
-          setProfile(null);
-          setIsAdmin(false);
-        },
+        ...state,
+        user: state.session?.user ?? null,
+        refreshProfile: store.refreshProfile,
+        retry: store.retry,
+        saveProfile: store.saveProfile,
+        signOut: store.signOut,
       }}
     >
       {children}
@@ -83,4 +93,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export const useAuth = () => useContext(AuthContext);
+export function useAuth() {
+  const auth = useContext(AuthContext);
+  if (!auth) throw new Error("useAuth requires AuthProvider");
+  return auth;
+}

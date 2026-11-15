@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { authSearch, isProfileComplete, safeReturnTo } from "@/lib/auth-flow";
+import { AuthStatus } from "@/components/AuthStatus";
 import { PRODUCT_CATEGORIES, REGIONS } from "@/lib/eki";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -15,10 +15,14 @@ import {
 } from "@/components/ui/select";
 
 export const Route = createFileRoute("/onboarding")({
+  validateSearch: authSearch,
   head: () => ({
     meta: [
       { title: "Set up your trader profile — Eki" },
-      { name: "description", content: "Tell us what you sell and where you trade to personalise Eki." },
+      {
+        name: "description",
+        content: "Tell us what you sell and where you trade to personalise Eki.",
+      },
       { property: "og:title", content: "Set up your trader profile — Eki" },
       { property: "og:description", content: "Tell us what you sell and where you trade." },
     ],
@@ -27,20 +31,21 @@ export const Route = createFileRoute("/onboarding")({
 });
 
 function Onboarding() {
-  const { user, profile, loading, refreshProfile } = useAuth();
+  const { user, profile, loading, error } = useAuth();
+  const { returnTo } = Route.useSearch();
   const navigate = useNavigate();
-  const [category, setCategory] = useState("");
-  const [region, setRegion] = useState("");
-  const [busy, setBusy] = useState(false);
+  const destination = safeReturnTo(returnTo);
 
   useEffect(() => {
-    if (profile) {
-      setCategory(profile.product_category ?? "");
-      setRegion(profile.trading_region ?? "");
+    if (!loading && !error && user && isProfileComplete(profile)) {
+      void navigate({ href: destination, replace: true });
     }
-  }, [profile]);
+  }, [loading, error, user, profile, destination, navigate]);
 
-  if (!loading && !user) {
+  if (loading || error) return <AuthStatus />;
+  if (user && isProfileComplete(profile)) return <AuthStatus redirecting />;
+
+  if (!user) {
     return (
       <div className="mx-auto max-w-md px-4 py-20 text-center">
         <div className="eki-panel p-8">
@@ -49,26 +54,50 @@ function Onboarding() {
             Verify your email, then sign in to set your product category and trading region.
           </p>
           <Button className="mt-6" asChild>
-            <Link to="/signin">Sign in</Link>
+            <Link to="/signin" search={{ returnTo: destination }}>
+              Sign in
+            </Link>
           </Button>
         </div>
       </div>
     );
   }
 
+  return <OnboardingForm key={user.id} />;
+}
+
+function OnboardingForm() {
+  const { user, profile, loading, error, saveProfile, retry } = useAuth();
+  const [category, setCategory] = useState("");
+  const [region, setRegion] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCategory(profile?.product_category ?? "");
+    setRegion(profile?.trading_region ?? "");
+    setSaveError(null);
+  }, [profile]);
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!category || !region) return toast.error("Pick a product category and a trading region");
+    if (busy || loading || error || !user) return;
+    if (!PRODUCT_CATEGORIES.includes(category) || !REGIONS.includes(region)) {
+      setSaveError("Pick a product category and a trading region.");
+      return;
+    }
     setBusy(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({ product_category: category, trading_region: region, onboarded: true })
-      .eq("id", user!.id);
-    setBusy(false);
-    if (error) return toast.error(error.message);
-    await refreshProfile();
-    toast.success("Profile saved");
-    navigate({ to: "/markets" });
+    setSaveError(null);
+    try {
+      await saveProfile(category, region);
+      // The completion effect routes only after the returned row is verified.
+    } catch (cause) {
+      setSaveError(
+        cause instanceof Error ? cause.message : "We couldn't save your profile. Please try again.",
+      );
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -112,6 +141,14 @@ function Onboarding() {
             </Select>
           </div>
 
+          {saveError && (
+            <div role="alert" className="space-y-2">
+              <p className="text-sm text-destructive">{saveError}</p>
+              <Button type="button" variant="outline" onClick={() => void retry()}>
+                Reload profile
+              </Button>
+            </div>
+          )}
           <Button type="submit" className="w-full" disabled={busy}>
             {busy ? "Saving…" : "Finish setup"}
           </Button>

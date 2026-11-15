@@ -1,8 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
+import { TraderAccess } from "@/components/TraderAccess";
 import { PRODUCT_CATEGORIES, REGIONS } from "@/lib/eki";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -24,11 +24,19 @@ export const Route = createFileRoute("/account")({
       { property: "og:description", content: "Update your product category and trading region." },
     ],
   }),
-  component: Account,
+  component: AccountPage,
 });
 
+function AccountPage() {
+  return (
+    <TraderAccess returnTo="/account">
+      <Account />
+    </TraderAccess>
+  );
+}
+
 function Account() {
-  const { user, profile, loading, refreshProfile } = useAuth();
+  const { user, profile, loading, error: authError, saveProfile } = useAuth();
   const [category, setCategory] = useState("");
   const [region, setRegion] = useState("");
   const [busy, setBusy] = useState(false);
@@ -38,30 +46,18 @@ function Account() {
     setRegion(profile?.trading_region ?? "");
   }, [profile]);
 
-  if (!loading && !user) {
-    return (
-      <div className="mx-auto max-w-md px-4 py-20 text-center">
-        <div className="eki-panel p-8">
-          <h1 className="text-2xl font-extrabold">Sign in to view your account</h1>
-          <Button className="mt-6" asChild>
-            <Link to="/signin">Sign in</Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   async function save(e: React.FormEvent) {
     e.preventDefault();
+    if (busy || loading || authError || !user) return;
     setBusy(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({ product_category: category, trading_region: region })
-      .eq("id", user!.id);
-    setBusy(false);
-    if (error) return toast.error(error.message);
-    await refreshProfile();
-    toast.success("Account updated");
+    try {
+      await saveProfile(category, region);
+      toast.success("Account updated");
+    } catch (cause) {
+      toast.error(cause instanceof Error ? cause.message : "Could not save your profile.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
