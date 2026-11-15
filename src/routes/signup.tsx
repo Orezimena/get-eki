@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authSearch, safeReturnTo } from "@/lib/auth-flow";
+import { pendingVerification, verificationRedirect } from "@/lib/verification-email";
 
 export const Route = createFileRoute("/signup")({
   validateSearch: authSearch,
@@ -37,19 +38,25 @@ function SignUp() {
     if (password.length < 6) return toast.error("Password must be at least 6 characters");
     if (password !== confirm) return toast.error("Passwords do not match");
 
+    if (busy) return;
     setBusy(true);
+    const emailRedirectTo = verificationRedirect(window.location.origin, returnTo);
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/onboarding${returnTo ? `?returnTo=${encodeURIComponent(destination)}` : ""}`,
+        emailRedirectTo,
       },
     });
     setBusy(false);
 
     if (error) return toast.error(error.message);
-    if (data.session) return navigate({ to: "/onboarding", search: { returnTo: destination } });
-    navigate({ to: "/verify-email", search: { email, returnTo: destination } });
+    if (data.session) {
+      pendingVerification.clear();
+      return navigate({ to: "/onboarding", search: { returnTo: destination } });
+    }
+    pendingVerification.remember(email, emailRedirectTo);
+    navigate({ to: "/verify-email", search: { returnTo: destination } });
   }
 
   return (
