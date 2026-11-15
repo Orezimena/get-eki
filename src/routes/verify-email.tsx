@@ -1,10 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { MailCheck } from "lucide-react";
 import { z } from "zod";
+import { safeReturnTo } from "@/lib/auth-flow";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/verify-email")({
-  validateSearch: z.object({ email: z.string().optional() }),
+  validateSearch: z.object({
+    email: z.string().optional(),
+    returnTo: z
+      .unknown()
+      .optional()
+      .transform((value) => safeReturnTo(value)),
+  }),
   head: () => ({
     meta: [
       { title: "Verify your email — Eki" },
@@ -17,7 +24,7 @@ export const Route = createFileRoute("/verify-email")({
 });
 
 function VerifyEmail() {
-  const { email } = Route.useSearch();
+  const { email, returnTo } = Route.useSearch();
 
   return (
     <div className="mx-auto max-w-md px-4 py-20 text-center">
@@ -29,7 +36,9 @@ function VerifyEmail() {
           straight to setting up your trader profile.
         </p>
         <Button variant="outline" className="mt-6" asChild>
-          <Link to="/signin">Back to sign in</Link>
+          <Link to="/signin" search={{ returnTo }}>
+            Back to sign in
+          </Link>
         </Button>
       </div>
     </div>

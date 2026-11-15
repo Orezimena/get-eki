@@ -5,12 +5,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { authSearch, safeReturnTo } from "@/lib/auth-flow";
 
 export const Route = createFileRoute("/signup")({
+  validateSearch: authSearch,
   head: () => ({
     meta: [
       { title: "Create your Eki account" },
-      { name: "description", content: "Join Eki and review the UK markets you trade at, anonymously." },
+      {
+        name: "description",
+        content: "Join Eki and review the UK markets you trade at, anonymously.",
+      },
       { property: "og:title", content: "Create your Eki account" },
       { property: "og:description", content: "Join Eki and review the UK markets you trade at." },
     ],
@@ -20,6 +25,8 @@ export const Route = createFileRoute("/signup")({
 
 function SignUp() {
   const navigate = useNavigate();
+  const { returnTo } = Route.useSearch();
+  const destination = safeReturnTo(returnTo);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -34,13 +41,15 @@ function SignUp() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: `${window.location.origin}/onboarding` },
+      options: {
+        emailRedirectTo: `${window.location.origin}/onboarding${returnTo ? `?returnTo=${encodeURIComponent(destination)}` : ""}`,
+      },
     });
     setBusy(false);
 
     if (error) return toast.error(error.message);
-    if (data.session) return navigate({ to: "/onboarding" });
-    navigate({ to: "/verify-email", search: { email } });
+    if (data.session) return navigate({ to: "/onboarding", search: { returnTo: destination } });
+    navigate({ to: "/verify-email", search: { email, returnTo: destination } });
   }
 
   return (
@@ -54,7 +63,13 @@ function SignUp() {
         <form onSubmit={submit} className="mt-6 space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+            <Input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="password">Password</Label>
@@ -83,7 +98,11 @@ function SignUp() {
 
         <p className="mt-6 text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link to="/signin" className="font-semibold text-primary hover:underline">
+          <Link
+            to="/signin"
+            search={{ returnTo: destination }}
+            className="font-semibold text-primary hover:underline"
+          >
             Sign in
           </Link>
         </p>

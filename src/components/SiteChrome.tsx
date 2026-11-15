@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Menu, UserRound } from "lucide-react";
+import { toast } from "sonner";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -40,8 +41,12 @@ export function SiteHeader() {
 
   async function handleSignOut() {
     setOpen(false);
-    await signOut();
-    navigate({ to: "/", replace: true });
+    try {
+      await signOut();
+      navigate({ to: "/", replace: true });
+    } catch {
+      toast.error("Sign out failed. Please try again.");
+    }
   }
 
   return (

@@ -1,5 +1,5 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { StarPicker } from "@/components/StarRating";
 import { Button } from "@/components/ui/button";
@@ -18,25 +18,39 @@ import { useMarkets } from "@/lib/queries";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { TraderAccess } from "@/components/TraderAccess";
+import { isProfileComplete } from "@/lib/auth-flow";
 
 export const Route = createFileRoute("/markets/$slug/review")({
   head: () => ({
     meta: [
       { title: "Leave a review — Eki" },
-      { name: "description", content: "Rate a UK popup market anonymously across five trading dimensions." },
+      {
+        name: "description",
+        content: "Rate a UK popup market anonymously across five trading dimensions.",
+      },
       { property: "og:title", content: "Leave a review — Eki" },
       { property: "og:description", content: "Rate a UK popup market anonymously." },
     ],
   }),
-  component: ReviewForm,
+  component: ReviewPage,
 });
 
 const today = new Date().toISOString().slice(0, 10);
 
+function ReviewPage() {
+  const { slug } = Route.useParams();
+  return (
+    <TraderAccess returnTo={`/markets/${slug}/review`}>
+      <ReviewForm />
+    </TraderAccess>
+  );
+}
+
 function ReviewForm() {
   const { slug } = Route.useParams();
   const navigate = useNavigate();
-  const { user, profile, loading } = useAuth();
+  const { user, profile, loading, error: authError } = useAuth();
   const { data: markets } = useMarkets();
   const market = markets?.find((m) => m.slug === slug);
 
@@ -52,55 +66,47 @@ function ReviewForm() {
   const [wouldReturn, setWouldReturn] = useState("");
   const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (profile?.product_category) setCategory(profile.product_category);
   }, [profile]);
 
-  if (!loading && !user) {
-    return (
-      <div className="mx-auto max-w-md px-4 py-20 text-center">
-        <div className="eki-panel p-8">
-          <h1 className="text-2xl font-extrabold">Sign in to leave a review</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Reviews stay anonymous — we only need an account to keep them genuine.
-          </p>
-          <div className="mt-6 flex justify-center gap-2">
-            <Button asChild>
-              <Link to="/signin">Sign in</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link to="/signup">Sign up</Link>
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!market) return;
+    if (busy || loading || authError || !user || !isProfileComplete(profile) || !market) return;
     if (!date) return toast.error("Pick the date you traded");
     if (DIMENSIONS.some((d) => !scores[d.key])) return toast.error("Rate all five dimensions");
     if (!wouldReturn) return toast.error("Tell us whether you'd return");
     if (!category) return toast.error("Pick your product category");
 
     setBusy(true);
-    const { error } = await supabase.from("reviews").insert({
-      market_id: market.id,
-      user_id: user!.id,
-      trading_date: date,
-      product_category: category,
-      trading_region: profile?.trading_region ?? null,
-      would_return: wouldReturn,
-      comment: comment.trim() || null,
-      status: "pending",
-      ...scores,
-    });
-    setBusy(false);
-    if (error) return toast.error(error.message);
-    navigate({ to: "/review-submitted" });
+    try {
+      const { error } = await supabase.from("reviews").insert({
+        market_id: market.id,
+        user_id: user.id,
+        trading_date: date,
+        product_category: category,
+        trading_region: profile?.trading_region ?? null,
+        would_return: wouldReturn,
+        comment: comment.trim() || null,
+        status: "pending",
+        ...scores,
+      });
+      if (!mounted.current) return;
+      if (error) return toast.error(error.message);
+      navigate({ to: "/review-submitted" });
+    } catch {
+      if (mounted.current) toast.error("Could not submit your review. Please try again.");
+    } finally {
+      if (mounted.current) setBusy(false);
+    }
   }
 
   return (
