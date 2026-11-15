@@ -69,7 +69,9 @@ test("pending and cooling-down requests disable resend with an accessible visibl
   const cooling = await render({ ...ready, remaining: 60 });
   assert.match(cooling, /disabled=""/);
   assert.match(cooling, /aria-describedby="resend-cooldown"/);
-  assert.match(cooling, /60 seconds/);
+  assert.match(cooling, /You can request another email in 60 seconds\./);
+  const lastSecond = await render({ ...ready, remaining: 1 });
+  assert.match(lastSecond, /You can request another email in 1 second\./);
   assert.match(cooling, /aria-live="off"/);
 });
 
@@ -80,8 +82,10 @@ test("feedback uses status/alert roles and never promises inbox delivery", async
   assert.doesNotMatch(success, /We&#x27;ve sent|email delivered/i);
   const failure = await render({
     ...ready,
-    feedback: "Too many requests. Please wait.",
+    feedback: "Please wait a little longer before trying again.",
     error: true,
   });
   assert.match(failure, /role="alert"/);
+  assert.match(failure, /Please wait a little longer before trying again\./);
+  assert.doesNotMatch(failure, /provider limits|Too many requests/);
 });

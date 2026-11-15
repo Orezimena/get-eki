@@ -40,7 +40,8 @@ export function VerificationEmailPanel({
         </Button>
         {state.remaining > 0 && (
           <p id="resend-cooldown" className="mt-2 text-sm text-muted-foreground" aria-live="off">
-            You can try again in {state.remaining} {state.remaining === 1 ? "second" : "seconds"}.
+            You can request another email in {state.remaining}{" "}
+            {state.remaining === 1 ? "second" : "seconds"}.
           </p>
         )}
         {state.feedback && (

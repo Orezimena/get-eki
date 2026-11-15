@@ -43,16 +43,16 @@ function harness(provider = async () => ({ error: null })) {
     },
   };
 }
-function remember(h, returnTo) {
+function rememberReady(h, returnTo) {
   const redirect = verificationRedirect("https://get-eki.lovable.app", returnTo);
   h.storage.remember("trader@example.com", redirect);
-  h.controller.tick();
+  h.advance(60_000);
   return redirect;
 }
 
 test("valid resend uses Supabase's signup resend request and the original redirect", async () => {
   const h = harness();
-  const redirect = remember(h, "/markets/leeds/review");
+  const redirect = rememberReady(h, "/markets/leeds/review");
   await h.controller.submit();
   assert.deepEqual(h.requests, [
     { type: "signup", email: "trader@example.com", options: { emailRedirectTo: redirect } },
@@ -67,7 +67,7 @@ test("missing or expired signup email never calls the provider", async () => {
   await h.controller.submit();
   assert.equal(h.requests.length, 0);
   assert.match(h.controller.getSnapshot().feedback, /Return to signup/);
-  remember(h);
+  rememberReady(h);
   h.advance(60 * 60 * 1000);
   await h.controller.submit();
   assert.equal(h.requests.length, 0);
@@ -99,7 +99,7 @@ test("duplicate clicks while awaiting the provider result in only one request", 
         resolve = yes;
       }),
   );
-  remember(h);
+  rememberReady(h);
   const pending = h.controller.submit();
   await h.controller.submit();
   await h.controller.submit();
@@ -112,7 +112,7 @@ test("duplicate clicks while awaiting the provider result in only one request", 
 
 test("cooldown is 60 seconds, counts down by elapsed time and blocks duplicate clicks", async () => {
   const h = harness();
-  remember(h);
+  rememberReady(h);
   await h.controller.submit();
   await h.controller.submit();
   h.advance(59_000);
@@ -127,7 +127,7 @@ test("cooldown is 60 seconds, counts down by elapsed time and blocks duplicate c
 
 test("cooldown survives page recreation and browser tab refresh", async () => {
   const h = harness();
-  remember(h);
+  rememberReady(h);
   await h.controller.submit();
   h.advance(20_000);
   const storage = createVerificationStorage(
@@ -156,9 +156,12 @@ test("provider rate limits display safe feedback and apply a retry cooldown", as
     { code: "over_request_rate_limit" },
   ]) {
     const h = harness(async () => ({ error }));
-    remember(h);
+    rememberReady(h);
     await h.controller.submit();
-    assert.match(h.controller.getSnapshot().feedback, /Too many requests/);
+    assert.equal(
+      h.controller.getSnapshot().feedback,
+      "Please wait a little longer before trying again.",
+    );
     assert.equal(h.controller.getSnapshot().remaining, 60);
     assert.equal(h.controller.getSnapshot().pending, false);
     await h.controller.submit();
@@ -174,7 +177,7 @@ test("provider failures never expose provider text or account existence", async 
     },
   ]) {
     const h = harness(provider);
-    remember(h);
+    rememberReady(h);
     await h.controller.submit();
     const state = h.controller.getSnapshot();
     assert.equal(state.pending, false);
@@ -193,26 +196,31 @@ test("correcting an email during a pending resend cannot overwrite the new signu
         resolve = yes;
       }),
   );
-  remember(h);
+  rememberReady(h);
   const pending = h.controller.submit();
   h.storage.remember("corrected@example.com", verificationRedirect("https://get-eki.lovable.app"));
   resolve({ error: null });
   await pending;
   assert.equal(h.storage.read().email, "corrected@example.com");
-  assert.equal(h.storage.read().retryAt, 0);
+  assert.equal(h.storage.read().retryAt, h.now() + 60_000);
 });
 
 test("blocked browser storage falls back to memory, without breaking resend", async () => {
+  let time = 100_000;
+  const now = () => time;
   const storage = createVerificationStorage(
     () => {
       throw new Error("blocked");
     },
     () => "https://get-eki.lovable.app",
+    now,
   );
   storage.remember("trader@example.com", verificationRedirect("https://get-eki.lovable.app"));
+  time += 60_000;
   let calls = 0;
   const controller = createVerificationResend({
     storage,
+    now,
     resend: async () => {
       calls++;
       return { error: null };
@@ -243,6 +251,8 @@ test("verification search excludes the email and retains only a safe destination
 });
 
 test("a failed storage write cannot resurrect an older cooldown", async () => {
+  let time = 100_000;
+  const now = () => time;
   let saved = null;
   let writesBlocked = false;
   const browserStorage = {
@@ -258,12 +268,15 @@ test("a failed storage write cannot resurrect an older cooldown", async () => {
   const storage = createVerificationStorage(
     () => browserStorage,
     () => "https://get-eki.lovable.app",
+    now,
   );
   storage.remember("trader@example.com", verificationRedirect("https://get-eki.lovable.app"));
+  time += 60_000;
   writesBlocked = true;
   let requests = 0;
   const controller = createVerificationResend({
     storage,
+    now,
     resend: async () => {
       requests++;
       return { error: null };
@@ -278,8 +291,57 @@ test("a failed storage write cannot resurrect an older cooldown", async () => {
 
 test("loading the verification page never automatically resends an email", () => {
   const h = harness();
-  remember(h);
+  rememberReady(h);
   h.controller.tick();
   h.advance(10_000);
   assert.equal(h.requests.length, 0);
+});
+
+test("successful signup starts the cooldown immediately and blocks resend until it expires", async () => {
+  const h = harness();
+  const redirect = verificationRedirect("https://get-eki.lovable.app", "/markets/leeds/review");
+  h.storage.remember("trader@example.com", redirect);
+  h.controller.tick();
+  assert.equal(h.controller.getSnapshot().remaining, 60);
+  assert.equal(h.controller.getSnapshot().target.redirectTo, redirect);
+  await h.controller.submit();
+  assert.equal(h.requests.length, 0);
+  h.advance(59_000);
+  assert.equal(h.controller.getSnapshot().remaining, 1);
+  await h.controller.submit();
+  assert.equal(h.requests.length, 0);
+  h.advance(1000);
+  assert.equal(h.controller.getSnapshot().remaining, 0);
+  await h.controller.submit();
+  assert.equal(h.requests.length, 1);
+  assert.equal(h.controller.getSnapshot().remaining, 60);
+});
+
+test("signup cooldown survives same-tab refresh before any resend request", async () => {
+  const h = harness();
+  h.storage.remember("trader@example.com", verificationRedirect("https://get-eki.lovable.app"));
+  h.advance(20_000);
+  const storage = createVerificationStorage(
+    () => h.browserStorage,
+    () => "https://get-eki.lovable.app",
+    h.now,
+  );
+  let requests = 0;
+  const refreshed = createVerificationResend({
+    storage,
+    now: h.now,
+    resend: async () => {
+      requests++;
+      return { error: null };
+    },
+  });
+  refreshed.tick();
+  assert.equal(refreshed.getSnapshot().remaining, 40);
+  await refreshed.submit();
+  assert.equal(requests, 0);
+  h.advance(40_000);
+  refreshed.tick();
+  assert.equal(refreshed.getSnapshot().remaining, 0);
+  await refreshed.submit();
+  assert.equal(requests, 1);
 });

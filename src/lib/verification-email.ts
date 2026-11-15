@@ -90,7 +90,12 @@ export function createVerificationStorage(
         clear();
         return;
       }
-      write({ email: email.trim(), redirectTo, expiresAt: now() + RETENTION_MS, retryAt: 0 });
+      write({
+        email: email.trim(),
+        redirectTo,
+        expiresAt: now() + RETENTION_MS,
+        retryAt: now() + RESEND_COOLDOWN_MS,
+      });
     },
   };
 }
@@ -194,7 +199,7 @@ export function createVerificationResend({
           feedback: !error
             ? RESEND_SUCCESS
             : limited
-              ? "Too many requests. Please wait before trying again. Email provider limits may take longer to reset."
+              ? "Please wait a little longer before trying again."
               : "We couldn't request another link right now. Please try again later.",
           error: !!error,
         });
