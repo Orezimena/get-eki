@@ -13,8 +13,8 @@ export function PasswordFeedback({ id, password }: { id: string; password: strin
             : "Minimum length not yet met."}
       </p>
       <p>
-        For better strength, use a longer, unique passphrase. Compromised passwords are checked when
-        you submit.
+        For better security, use a longer, unique passphrase. Some passwords may be rejected for
+        security reasons.
       </p>
     </div>
   );

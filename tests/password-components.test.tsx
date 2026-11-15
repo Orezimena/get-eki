@@ -92,6 +92,11 @@ test("live length feedback never labels a minimum-length password as strong", ()
   const minimum = renderToStaticMarkup(<PasswordFeedback id="guide" password="aaaaaa" />);
   assert.match(minimum, /Minimum length met/);
   assert.match(minimum, /Length alone does not guarantee strength/);
+  assert.match(
+    minimum,
+    /For better security, use a longer, unique passphrase\. Some passwords may be rejected for security reasons\./,
+  );
+  assert.doesNotMatch(minimum, /Compromised passwords are checked/);
   assert.match(minimum, /role="status"/);
   assert.doesNotMatch(minimum, /Strong password|uppercase|digit|symbol/);
 });
