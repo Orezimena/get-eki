@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/PasswordInput";
 import { useAuth } from "@/lib/auth";
 import { authDestination, authSearch } from "@/lib/auth-flow";
 import { AuthStatus } from "@/components/AuthStatus";
@@ -40,17 +41,22 @@ function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (busy) return;
+    setErrorMessage(null);
     setBusy(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) toast.error(error.message);
+      if (error)
+        setErrorMessage(
+          "Could not sign in. Check your email and password, and verify your email if needed.",
+        );
       // AuthProvider resolves the session and profile before the effect routes.
     } catch {
-      toast.error("Could not sign in. Please try again.");
+      setErrorMessage("Could not sign in. Please try again.");
     } finally {
       setBusy(false);
     }
@@ -73,15 +79,26 @@ function SignIn() {
         <h1 className="text-2xl font-extrabold">Sign in</h1>
         <p className="mt-1 text-sm text-muted-foreground">Back to the good stalls.</p>
 
-        <form onSubmit={submit} className="mt-6 space-y-4">
+        <form
+          onSubmit={submit}
+          aria-busy={busy}
+          aria-describedby={errorMessage ? "signin-error" : undefined}
+          className="mt-6 space-y-4"
+        >
           <div className="space-y-1.5">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
+              name="email"
+              autoComplete="email"
+              disabled={busy}
               required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setErrorMessage(null);
+              }}
             />
           </div>
           <div className="space-y-1.5">
@@ -95,14 +112,25 @@ function SignIn() {
                 Forgot password?
               </button>
             </div>
-            <Input
+            <PasswordInput
               id="password"
-              type="password"
+              visibilityLabel="password"
+              name="password"
+              autoComplete="current-password"
+              disabled={busy}
               required
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setErrorMessage(null);
+              }}
             />
           </div>
+          {errorMessage && (
+            <p id="signin-error" role="alert" className="text-sm text-destructive">
+              {errorMessage}
+            </p>
+          )}
           <Button type="submit" className="w-full" disabled={busy}>
             {busy ? "Signing in…" : "Sign in"}
           </Button>

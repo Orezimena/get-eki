@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/PasswordInput";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DIMENSIONS, formatDate } from "@/lib/eki";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,7 +17,10 @@ export const Route = createFileRoute("/admin/")({
   head: () => ({
     meta: [
       { title: "Moderation queue — Eki" },
-      { name: "description", content: "Approve or reject pending trader reviews before they go live." },
+      {
+        name: "description",
+        content: "Approve or reject pending trader reviews before they go live.",
+      },
       { property: "og:title", content: "Moderation queue — Eki" },
       { property: "og:description", content: "Approve or reject pending trader reviews." },
       { name: "robots", content: "noindex" },
@@ -76,8 +80,7 @@ function Admin() {
 
         {(pending ?? []).map((r) => {
           const market = markets?.find((m) => m.id === r.market_id);
-          const overall =
-            DIMENSIONS.reduce((sum, d) => sum + r[d.key], 0) / DIMENSIONS.length;
+          const overall = DIMENSIONS.reduce((sum, d) => sum + r[d.key], 0) / DIMENSIONS.length;
           return (
             <article key={r.id} className="eki-panel p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -128,18 +131,31 @@ function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (busy) return;
+    setLoginError(null);
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setBusy(false);
-    if (error) return toast.error("Access denied. This area is for Eki admins only.");
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) setLoginError("Access denied. This area is for Eki admins only.");
+    } catch {
+      setLoginError("Could not sign in. Please try again.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
     <div className="mx-auto max-w-md px-4 py-20">
-      <form onSubmit={submit} className="eki-panel space-y-4 p-8">
+      <form
+        onSubmit={submit}
+        aria-busy={busy}
+        aria-describedby={loginError ? "admin-login-error" : undefined}
+        className="eki-panel space-y-4 p-8"
+      >
         <h1 className="text-2xl font-extrabold text-foreground">Admin sign in</h1>
         <p className="text-sm text-muted-foreground">
           The moderation queue is restricted to Eki admins.
@@ -149,21 +165,38 @@ function AdminLogin() {
           <Input
             id="admin-email"
             type="email"
+            name="email"
+            autoComplete="email"
+            disabled={busy}
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setLoginError(null);
+            }}
             required
           />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="admin-password">Password</Label>
-          <Input
+          <PasswordInput
             id="admin-password"
-            type="password"
+            visibilityLabel="admin password"
+            name="password"
+            autoComplete="current-password"
+            disabled={busy}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setLoginError(null);
+            }}
             required
           />
         </div>
+        {loginError && (
+          <p id="admin-login-error" role="alert" className="text-sm text-destructive">
+            {loginError}
+          </p>
+        )}
         <Button type="submit" className="w-full" disabled={busy}>
           {busy ? "Signing in…" : "Sign in"}
         </Button>
