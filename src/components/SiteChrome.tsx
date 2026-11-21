@@ -68,6 +68,9 @@ export function SiteHeader() {
                 <DropdownMenuItem asChild>
                   <Link to="/account">Profile settings</Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/my-reviews">My Reviews</Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={() => void handleSignOut()}>Sign out</DropdownMenuItem>
               </DropdownMenuContent>
@@ -106,6 +109,13 @@ export function SiteHeader() {
                 onClick={() => setOpen(false)}
               >
                 Profile settings
+              </Link>
+              <Link
+                to="/my-reviews"
+                className="text-sm font-medium text-foreground hover:text-primary"
+                onClick={() => setOpen(false)}
+              >
+                My Reviews
               </Link>
               <Button variant="outline" size="sm" onClick={handleSignOut}>
                 Sign out
