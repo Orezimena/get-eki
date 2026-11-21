@@ -12,7 +12,7 @@ export function isProfileComplete(profile: Profile | null): profile is Profile {
 // auth routes (which could loop), encoded separators, or arbitrary admin paths.
 export function safeReturnTo(value: unknown): string {
   if (typeof value !== "string" || /[%\\\s?#]/.test(value)) return "/markets";
-  return /^\/(?:markets(?:\/[a-zA-Z0-9_-]+(?:\/review)?)?|organisers\/[a-zA-Z0-9_-]+|account)\/?$/.test(
+  return /^\/(?:markets(?:\/[a-zA-Z0-9_-]+(?:\/review)?)?|organisers\/[a-zA-Z0-9_-]+|account|my-reviews)\/?$/.test(
     value,
   )
     ? value

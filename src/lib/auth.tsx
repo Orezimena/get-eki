@@ -10,6 +10,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { createAuthState, type AuthState } from "./auth-state";
+import { clearPrivateQueries } from "./private-cache";
 
 export type AuthValue = AuthState & {
   user: User | null;
@@ -65,13 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { error } = await supabase.auth.signOut();
         if (error) throw error;
       },
-      clearPrivateData: () => {
-        const privateQuery = (query: { queryKey: readonly unknown[] }) =>
-          query.queryKey[0] === "review_votes" ||
-          (query.queryKey[0] === "reviews" && query.queryKey[1] !== "approved");
-        void queryClient.cancelQueries({ predicate: privateQuery });
-        queryClient.removeQueries({ predicate: privateQuery });
-      },
+      clearPrivateData: () => clearPrivateQueries(queryClient),
     }),
   );
   const state = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);

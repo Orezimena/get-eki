@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountRouteImport } from './routes/account'
+import { Route as MyReviewsRouteImport } from './routes/my-reviews'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ReviewSubmittedRouteImport } from './routes/review-submitted'
@@ -31,6 +32,11 @@ const IndexRoute = IndexRouteImport.update({
 const AccountRoute = AccountRouteImport.update({
   id: '/account',
   path: '/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyReviewsRoute = MyReviewsRouteImport.update({
+  id: '/my-reviews',
+  path: '/my-reviews',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -92,6 +98,7 @@ const MarketsSlugReviewRoute = MarketsSlugReviewRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
+  '/my-reviews': typeof MyReviewsRoute
   '/onboarding': typeof OnboardingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/review-submitted': typeof ReviewSubmittedRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
+  '/my-reviews': typeof MyReviewsRoute
   '/onboarding': typeof OnboardingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/review-submitted': typeof ReviewSubmittedRoute
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
+  '/my-reviews': typeof MyReviewsRoute
   '/onboarding': typeof OnboardingRoute
   '/reset-password': typeof ResetPasswordRoute
   '/review-submitted': typeof ReviewSubmittedRoute
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/account'
+    | '/my-reviews'
     | '/onboarding'
     | '/reset-password'
     | '/review-submitted'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/account'
+    | '/my-reviews'
     | '/onboarding'
     | '/reset-password'
     | '/review-submitted'
@@ -170,6 +181,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/account'
+    | '/my-reviews'
     | '/onboarding'
     | '/reset-password'
     | '/review-submitted'
@@ -186,6 +198,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRoute
+  MyReviewsRoute: typeof MyReviewsRoute
   OnboardingRoute: typeof OnboardingRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   ReviewSubmittedRoute: typeof ReviewSubmittedRoute
@@ -213,6 +226,13 @@ declare module '@tanstack/react-router' {
       path: '/account'
       fullPath: '/account'
       preLoaderRoute: typeof AccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-reviews': {
+      id: '/my-reviews'
+      path: '/my-reviews'
+      fullPath: '/my-reviews'
+      preLoaderRoute: typeof MyReviewsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -298,6 +318,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
+  MyReviewsRoute: MyReviewsRoute,
   OnboardingRoute: OnboardingRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   ReviewSubmittedRoute: ReviewSubmittedRoute,
