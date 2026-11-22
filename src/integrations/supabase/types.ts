@@ -29,8 +29,8 @@ export type Database = {
           postcode: string | null
           region: string
           slug: string
-          stall_fee_max: number
-          stall_fee_min: number
+          stall_fee_max: number | null
+          stall_fee_min: number | null
           type: string
           typical_days: string | null
         }
@@ -48,8 +48,8 @@ export type Database = {
           postcode?: string | null
           region: string
           slug: string
-          stall_fee_max?: number
-          stall_fee_min?: number
+          stall_fee_max?: number | null
+          stall_fee_min?: number | null
           type: string
           typical_days?: string | null
         }
@@ -67,8 +67,8 @@ export type Database = {
           postcode?: string | null
           region?: string
           slug?: string
-          stall_fee_max?: number
-          stall_fee_min?: number
+          stall_fee_max?: number | null
+          stall_fee_min?: number | null
           type?: string
           typical_days?: string | null
         }

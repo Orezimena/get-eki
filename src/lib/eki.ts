@@ -99,6 +99,8 @@ export const gbp = (n: number) =>
   }).format(n);
 
 export function feeRange(market: Pick<Market, "stall_fee_min" | "stall_fee_max">) {
+  if (market.stall_fee_min === null || market.stall_fee_max === null)
+    return "Stall fee not confirmed";
   return market.stall_fee_min === market.stall_fee_max
     ? gbp(market.stall_fee_min)
     : `${gbp(market.stall_fee_min)}–${gbp(market.stall_fee_max)}`;
@@ -118,4 +120,9 @@ export function organiserSlug(name: string) {
     .replace(/&/g, "and")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
+}
+
+// An unknown price cannot satisfy an explicit budget filter.
+export function withinStallBudget(market: Pick<Market, "stall_fee_min">, limit: number | null) {
+  return limit === null || (market.stall_fee_min !== null && market.stall_fee_min <= limit);
 }
