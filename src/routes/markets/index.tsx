@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { computeStats, gbp, REGIONS } from "@/lib/eki";
+import { computeStats, gbp, REGIONS, withinStallBudget } from "@/lib/eki";
 import { useApprovedReviews, useMarkets } from "@/lib/queries";
 
 export const Route = createFileRoute("/markets/")({
@@ -71,7 +71,7 @@ function MarketsPage() {
   const filtered = searched.filter(({ market, stats }) => {
     if (types.length && !types.includes(market.type)) return false;
     if (region !== ANY && market.region !== region) return false;
-    if (market.stall_fee_min > fee[0]) return false;
+    if (!withinStallBudget(market, fee[0] >= FEE_MAX ? null : fee[0])) return false;
     if (ratedOnly && !stats.rated) return false;
     if (minScore !== ANY && (!stats.rated || (stats.overall ?? 0) < Number(minScore))) return false;
     return true;

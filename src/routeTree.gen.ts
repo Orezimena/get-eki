@@ -19,6 +19,8 @@ import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminAddMarketRouteImport } from './routes/admin/add-market'
+import { Route as AdminManageMarketsRouteImport } from './routes/admin/manage-markets'
 import { Route as MarketsIndexRouteImport } from './routes/markets/index'
 import { Route as OrganisersSlugRouteImport } from './routes/organisers/$slug'
 import { Route as MarketsSlugIndexRouteImport } from './routes/markets/$slug.index'
@@ -74,6 +76,16 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAddMarketRoute = AdminAddMarketRouteImport.update({
+  id: '/admin/add-market',
+  path: '/admin/add-market',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminManageMarketsRoute = AdminManageMarketsRouteImport.update({
+  id: '/admin/manage-markets',
+  path: '/admin/manage-markets',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MarketsIndexRoute = MarketsIndexRouteImport.update({
   id: '/markets/',
   path: '/markets/',
@@ -105,6 +117,8 @@ export interface FileRoutesByFullPath {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/admin/add-market': typeof AdminAddMarketRoute
+  '/admin/manage-markets': typeof AdminManageMarketsRoute
   '/organisers/$slug': typeof OrganisersSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/markets/': typeof MarketsIndexRoute
@@ -121,6 +135,8 @@ export interface FileRoutesByTo {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/admin/add-market': typeof AdminAddMarketRoute
+  '/admin/manage-markets': typeof AdminManageMarketsRoute
   '/organisers/$slug': typeof OrganisersSlugRoute
   '/admin': typeof AdminIndexRoute
   '/markets': typeof MarketsIndexRoute
@@ -138,6 +154,8 @@ export interface FileRoutesById {
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
   '/verify-email': typeof VerifyEmailRoute
+  '/admin/add-market': typeof AdminAddMarketRoute
+  '/admin/manage-markets': typeof AdminManageMarketsRoute
   '/organisers/$slug': typeof OrganisersSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/markets/': typeof MarketsIndexRoute
@@ -156,6 +174,8 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/verify-email'
+    | '/admin/add-market'
+    | '/admin/manage-markets'
     | '/organisers/$slug'
     | '/admin/'
     | '/markets/'
@@ -172,6 +192,8 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/verify-email'
+    | '/admin/add-market'
+    | '/admin/manage-markets'
     | '/organisers/$slug'
     | '/admin'
     | '/markets'
@@ -188,6 +210,8 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signup'
     | '/verify-email'
+    | '/admin/add-market'
+    | '/admin/manage-markets'
     | '/organisers/$slug'
     | '/admin/'
     | '/markets/'
@@ -205,6 +229,8 @@ export interface RootRouteChildren {
   SigninRoute: typeof SigninRoute
   SignupRoute: typeof SignupRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
+  AdminAddMarketRoute: typeof AdminAddMarketRoute
+  AdminManageMarketsRoute: typeof AdminManageMarketsRoute
   OrganisersSlugRoute: typeof OrganisersSlugRoute
   AdminIndexRoute: typeof AdminIndexRoute
   MarketsIndexRoute: typeof MarketsIndexRoute
@@ -284,6 +310,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/add-market': {
+      id: '/admin/add-market'
+      path: '/admin/add-market'
+      fullPath: '/admin/add-market'
+      preLoaderRoute: typeof AdminAddMarketRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/manage-markets': {
+      id: '/admin/manage-markets'
+      path: '/admin/manage-markets'
+      fullPath: '/admin/manage-markets'
+      preLoaderRoute: typeof AdminManageMarketsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/markets/': {
       id: '/markets/'
       path: '/markets'
@@ -325,6 +365,8 @@ const rootRouteChildren: RootRouteChildren = {
   SigninRoute: SigninRoute,
   SignupRoute: SignupRoute,
   VerifyEmailRoute: VerifyEmailRoute,
+  AdminAddMarketRoute: AdminAddMarketRoute,
+  AdminManageMarketsRoute: AdminManageMarketsRoute,
   OrganisersSlugRoute: OrganisersSlugRoute,
   AdminIndexRoute: AdminIndexRoute,
   MarketsIndexRoute: MarketsIndexRoute,
