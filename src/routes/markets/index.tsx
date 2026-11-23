@@ -16,7 +16,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { computeStats, gbp, REGIONS, withinStallBudget } from "@/lib/eki";
+import { computeStats, gbp, REGIONS } from "@/lib/eki";
+import { directoryResults } from "@/lib/market-directory";
 import { useApprovedReviews, useMarkets } from "@/lib/queries";
 
 export const Route = createFileRoute("/markets/")({
@@ -29,7 +30,10 @@ export const Route = createFileRoute("/markets/")({
           "Browse UK popup markets with trader-sourced ratings for footfall, spend power, organiser comms and stall fees.",
       },
       { property: "og:title", content: "UK market directory — Eki" },
-      { property: "og:description", content: "Browse UK popup markets rated by the traders who work them." },
+      {
+        property: "og:description",
+        content: "Browse UK popup markets rated by the traders who work them.",
+      },
     ],
   }),
   component: MarketsPage,
@@ -62,20 +66,15 @@ function MarketsPage() {
     }));
   }, [markets, reviews]);
 
-  const q = search.trim().toLowerCase();
-  const searched = rows.filter(
-    ({ market }) =>
-      !q || market.name.toLowerCase().includes(q) || market.city.toLowerCase().includes(q),
-  );
-
-  const filtered = searched.filter(({ market, stats }) => {
-    if (types.length && !types.includes(market.type)) return false;
-    if (region !== ANY && market.region !== region) return false;
-    if (!withinStallBudget(market, fee[0] >= FEE_MAX ? null : fee[0])) return false;
-    if (ratedOnly && !stats.rated) return false;
-    if (minScore !== ANY && (!stats.rated || (stats.overall ?? 0) < Number(minScore))) return false;
-    return true;
+  const { searched, filtered } = directoryResults(rows, {
+    search,
+    types,
+    region: region === ANY ? null : region,
+    feeLimit: fee[0] >= FEE_MAX ? null : fee[0],
+    minScore: minScore === ANY ? null : Number(minScore),
+    ratedOnly,
   });
+  const showSearchEmpty = !isLoading && searched.length === 0;
 
   const filtersActive =
     types.length > 0 || region !== ANY || fee[0] < FEE_MAX || minScore !== ANY || ratedOnly;
@@ -91,7 +90,9 @@ function MarketsPage() {
   const pills: { label: string; clear: () => void }[] = [
     ...types.map((t) => ({ label: t, clear: () => setTypes((p) => p.filter((x) => x !== t)) })),
     ...(region !== ANY ? [{ label: region, clear: () => setRegion(ANY) }] : []),
-    ...(fee[0] < FEE_MAX ? [{ label: `Up to ${gbp(fee[0])}`, clear: () => setFee([FEE_MAX]) }] : []),
+    ...(fee[0] < FEE_MAX
+      ? [{ label: `Up to ${gbp(fee[0])}`, clear: () => setFee([FEE_MAX]) }]
+      : []),
     ...(minScore !== ANY ? [{ label: `${minScore}+ score`, clear: () => setMinScore(ANY) }] : []),
     ...(ratedOnly ? [{ label: "Rated only", clear: () => setRatedOnly(false) }] : []),
   ];
@@ -100,11 +101,14 @@ function MarketsPage() {
     <div className="mx-auto max-w-6xl px-4 py-10">
       <h1 className="text-3xl font-extrabold text-foreground sm:text-4xl">Market directory</h1>
       <p className="mt-1 text-muted-foreground">
-        {markets?.length ?? 0} UK popup markets, rated by traders.
+        {markets?.length ?? 0} UK popup markets to explore.
       </p>
 
       <div className="relative mt-6">
-        <Search className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" size={18} />
+        <Search
+          className="absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground"
+          size={18}
+        />
         <Input
           className="h-12 pl-10"
           placeholder="Search by market name or city…"
@@ -113,6 +117,8 @@ function MarketsPage() {
           aria-label="Search markets"
         />
       </div>
+
+      {!showSearchEmpty && <SuggestMarketLink />}
 
       <div className="eki-panel mt-4 grid gap-5 p-5 lg:grid-cols-4">
         <div className="space-y-2">
@@ -125,9 +131,7 @@ function MarketsPage() {
                   key={t}
                   type="button"
                   aria-pressed={on}
-                  onClick={() =>
-                    setTypes((p) => (on ? p.filter((x) => x !== t) : [...p, t]))
-                  }
+                  onClick={() => setTypes((p) => (on ? p.filter((x) => x !== t) : [...p, t]))}
                   className={
                     on
                       ? "rounded-full bg-mint px-3 py-1 text-xs font-medium text-mint-foreground"
@@ -190,7 +194,10 @@ function MarketsPage() {
       {pills.length > 0 && (
         <div className="mt-4 flex flex-wrap items-center gap-2">
           {pills.map((p) => (
-            <Badge key={p.label} className="gap-1 border-transparent bg-mint py-1 pr-1 pl-3 text-mint-foreground">
+            <Badge
+              key={p.label}
+              className="gap-1 border-transparent bg-mint py-1 pr-1 pl-3 text-mint-foreground"
+            >
               {p.label}
               <button
                 type="button"
@@ -210,7 +217,9 @@ function MarketsPage() {
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {isLoading
-          ? Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-40 rounded-xl" />)
+          ? Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-40 rounded-xl" />
+            ))
           : filtered.map(({ market, stats }) => (
               <MarketCard key={market.id} market={market} stats={stats} />
             ))}
@@ -219,7 +228,12 @@ function MarketsPage() {
       {!isLoading && filtered.length === 0 && (
         <div className="eki-panel mt-6 p-10 text-center">
           {searched.length === 0 ? (
-            <p className="font-medium">No markets found. Try a different search or clear your filters</p>
+            <>
+              <p className="font-medium">
+                No markets found. Try a different search or clear your filters
+              </p>
+              <SuggestMarketLink />
+            </>
           ) : (
             <>
               <p className="font-medium">No markets match your filters</p>
@@ -236,5 +250,19 @@ function MarketsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+function SuggestMarketLink() {
+  return (
+    <a
+      href="https://forms.gle/JDL6aSWgUGZHm5L56"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="mt-2 inline-flex min-h-11 items-center rounded-md text-sm font-medium text-primary underline underline-offset-4 hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+    >
+      Can't find your market? Suggest a market
+      <span className="sr-only"> (opens in a new tab)</span>
+    </a>
   );
 }
