@@ -1,4 +1,4 @@
-# Market Insights Hub
+# Eki
 
 Build a complete web app called Eki — an anonymous market intelligence platform for UK popup market traders. Eki is like Glassdoor but for market traders: vendors anonymously review markets they trade at, and other traders read those reviews before deciding where to book a stall.
 
